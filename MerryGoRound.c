@@ -42,6 +42,7 @@
 #include "LoadShader.h"
 #include "Matrix.h"  
 
+
 /* Flag for starting/stopping animation */
 GLboolean anim = GL_FALSE;
 GLboolean auto_anim = GL_TRUE;
