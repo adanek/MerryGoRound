@@ -794,6 +794,7 @@ void Mouse(int button, int state, int x, int y) {
  *
  *******************************************************************/
 
+
 int main(int argc, char** argv) {
 	/* Initialize GLUT; set double buffered window and RGBA color model */
 	glutInit(&argc, argv);
