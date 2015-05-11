@@ -12,7 +12,7 @@
  * 3. mouse functions
  * 4. automatic zoom (only active in auto-camera mode)
  * 5. floor added
- * 6. background object added
+ * 6. background object added (pyramid with teapot on top)
  *
  * Keys:
  * q or Q: quit program
@@ -28,9 +28,12 @@
  *******************************************************************/
 #define _USE_MATH_DEFINES
 
+#include "Pati.h"
+
 #ifdef PATI
 #define GLEW_STATIC
 #endif
+
 
 /* Standard includes */
 #include <stdio.h>
@@ -44,8 +47,8 @@
 
 /* Local includes */
 #include "LoadShader.h"
-#include "Matrix.h"  
-
+#include "Matrix.h"
+#include "OBJParser.h"     /* Loading function for triangle meshes in OBJ format */
 
 /* Flag for starting/stopping animation */
 GLboolean anim = GL_FALSE;
@@ -63,13 +66,22 @@ int oldTime = 0;
 /*----------------------------------------------------------------*/
 
 /* Define handles to vertex buffer objects */
-GLuint VBO, VBO2;
+GLuint VBO, VBO2, VBO_TEAPOT;
 
 /* Define handles to color buffer objects */
 GLuint CBO, CBO2, CBO3, CBO4, CBO5, CBO6, CBO7;
 
 /* Define handles to index buffer objects */
-GLuint IBO, IBO2;
+GLuint IBO, IBO2, IBO_TEAPOT;
+
+/* Arrays for holding vertex data of the two models */
+GLfloat *vertex_buffer_teapot;
+
+/* Arrays for holding indices of the two models */
+GLushort *index_buffer_teapot;
+
+//objects
+obj_scene_data data;
 
 /* Indices to vertex attributes; in this case positon and color */
 enum DataID {
@@ -107,6 +119,7 @@ float ModelMatrixPyramid2[16];
 float ModelMatrixPyramid3[16];
 float ModelMatrixPyramid4[16];
 float ModelMatrixPyramid5[16];
+float ModelMatrixPyramidTeapot[16];
 float ModelMatrixPyramidTop[16];
 float ModelMatrixTop[16];
 float ModelMatrixFloor[16];
@@ -114,8 +127,9 @@ float ModelMatrixFloor[16];
 /*----------------------------------------------------------------*/
 //Buffers for cuboid:
 //Vertex buffer
-GLfloat vertex_buffer_data[] = { /* 8 cube vertices */-4.0, -0.25, -4.0, -4.0, -0.25, 4.0, -4.0, 0.25, 4.0, -4.0, 0.25, -4.0, 4.0,
-		-0.25, 4.0, 4.0, -0.25, -4.0, 4.0, 0.25, -4.0, 4.0, 0.25,  4.0, };
+GLfloat vertex_buffer_data[] = { /* 8 cube vertices */-4.0, -0.25, -4.0, -4.0,
+		-0.25, 4.0, -4.0, 0.25, 4.0, -4.0, 0.25, -4.0, 4.0, -0.25, 4.0, 4.0,
+		-0.25, -4.0, 4.0, 0.25, -4.0, 4.0, 0.25,  4.0, };
 
 //Color buffers
 GLfloat color_buffer_data[] = { /* RGB color values for vertices */
@@ -158,12 +172,7 @@ GLfloat color_buffer_data_floor[] = { /* RGB color values for vertices */
 		1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, };
 
 GLfloat color_buffer_data_background_object[] = { /* RGB color values for vertices */
-    1.0, 0.0, 0.0,
-    0.0, 1.0, 0.0,
-    1.0, 0.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 0.0, 1.0,
-};
+1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, };
 
 //Index buffer
 GLushort index_buffer_data2[] = { /* Indices of triangles */
@@ -369,6 +378,28 @@ void Display() {
 
 	//end floor
 
+	//begin teapot
+
+	//switch to pyramid buffers
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_TEAPOT);
+	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_TEAPOT);
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+
+	//switch color buffer
+	glBindBuffer(GL_ARRAY_BUFFER, CBO5);
+	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	SetScaling(1.0, 1.0, 1.0, scaling);
+	SetTranslation(10.0, 5.0, -10.0, transform);
+	MultiplyMatrix(transform, scaling, ModelMatrixPyramidTeapot);
+	MultiplyMatrix(transform, ModelMatrixPyramidTeapot, transform);
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixPyramidTeapot);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+	//end teapot
+
 	/* Disable attributes */
 	glDisableVertexAttribArray(vPosition);
 	glDisableVertexAttribArray(vColor);
@@ -403,28 +434,28 @@ void OnIdle() {
 	MultiplyMatrix(temp, Rotation, ModelMatrixPyramidTop);
 
 	//pyramid 1
-	SetTranslation(0.3, (sin(M_PI/180*angle)*1.0+2)/2, 0.0, temp2);
+	SetTranslation(0.3, (sin(M_PI / 180 * angle) * 1.0 + 2) / 2, 0.0, temp2);
 	SetRotationY(angle * 2, rotation);
 	SetTranslation(-2.5, 1.1, 0.0, temp);
 	MultiplyMatrix(temp2, rotation, rotation);
 	MultiplyMatrix(temp, rotation, ModelMatrixPyramid);
 
 	//pyramid 2
-	SetTranslation(0.0, (cos(M_PI/180*angle)*1.0+2)/2, -0.3, temp2);
+	SetTranslation(0.0, (cos(M_PI / 180 * angle) * 1.0 + 2) / 2, -0.3, temp2);
 	SetRotationY(angle * 2, rotation);
 	SetTranslation(2.5, 1.1, 0.0, temp);
 	MultiplyMatrix(temp2, rotation, rotation);
 	MultiplyMatrix(temp, rotation, ModelMatrixPyramid2);
 
 	//pyramid 3
-	SetTranslation(-0.3, (-sin(M_PI/180*angle)+2)/2, 0.0, temp2);
+	SetTranslation(-0.3, (-sin(M_PI / 180 * angle) + 2) / 2, 0.0, temp2);
 	SetRotationY(angle * (-2), rotation);
 	SetTranslation(0.0, 1.1, -2.5, temp);
 	MultiplyMatrix(temp2, rotation, rotation);
 	MultiplyMatrix(temp, rotation, ModelMatrixPyramid3);
 
 	//pyramid 4
-	SetTranslation(0.0, (-cos(M_PI/180*angle)+2)/2, 0.3, temp2);
+	SetTranslation(0.0, (-cos(M_PI / 180 * angle) + 2) / 2, 0.3, temp2);
 	SetRotationY(angle * (-2), rotation);
 	SetTranslation(0.0, 1.1, 2.5, temp);
 	MultiplyMatrix(temp2, rotation, rotation);
@@ -464,9 +495,9 @@ void OnIdle() {
 
 	//automatic zoom
 	float zoom = 0.0005;
-	if(auto_anim){
+	if (auto_anim) {
 		//change zoom direction
-		if(distance > -15 || distance < -20){
+		if (distance > -15 || distance < -20) {
 			dir *= -1;
 		}
 		//get new camera distance
@@ -560,6 +591,18 @@ void SetupDataBuffers() {
 	glBindBuffer(GL_ARRAY_BUFFER, CBO7);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(color_buffer_data_background_object),
 			color_buffer_data_background_object, GL_STATIC_DRAW);
+
+
+	//vertex buffer for teapot
+    glGenBuffers(1, &VBO_TEAPOT);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_TEAPOT);
+    glBufferData(GL_ARRAY_BUFFER, data.vertex_count*3*sizeof(GLfloat), vertex_buffer_teapot, GL_STATIC_DRAW);
+
+    //index buffer for teapot
+    glGenBuffers(1, &IBO_TEAPOT);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_TEAPOT);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.face_count*3*sizeof(GLushort), index_buffer_teapot, GL_STATIC_DRAW);
+
 }
 
 /******************************************************************
@@ -666,6 +709,43 @@ void CreateShaderProgram() {
  *******************************************************************/
 
 void Initialize(void) {
+
+	int i;
+	int success;
+
+
+	/* Load first OBJ model */
+	char* filename = "models/teapot.obj";
+	success = parse_obj_scene(&data, filename);
+
+	if (!success)
+		printf("Could not load file. Exiting.\n");
+
+	/*  Copy mesh data from structs into appropriate arrays */
+	int vert = data.vertex_count;
+	int indx = data.face_count;
+
+	vertex_buffer_teapot = (GLfloat*) calloc(vert * 3, sizeof(GLfloat));
+	index_buffer_teapot = (GLushort*) calloc(indx * 3, sizeof(GLushort));
+
+	/* Vertices */
+	for (i = 0; i < vert; i++) {
+		vertex_buffer_teapot[i * 3] = (GLfloat) (*data.vertex_list[i]).e[0];
+		vertex_buffer_teapot[i * 3 + 1] = (GLfloat) (*data.vertex_list[i]).e[1];
+		vertex_buffer_teapot[i * 3 + 2] = (GLfloat) (*data.vertex_list[i]).e[2];
+	}
+
+	/* Indices */
+	for (i = 0; i < indx; i++) {
+		index_buffer_teapot[i * 3] =
+				(GLushort) (*data.face_list[i]).vertex_index[0];
+		index_buffer_teapot[i * 3 + 1] =
+				(GLushort) (*data.face_list[i]).vertex_index[1];
+		index_buffer_teapot[i * 3 + 2] =
+				(GLushort) (*data.face_list[i]).vertex_index[2];
+	}
+
+
 	/* Set background (clear) color to blue */
 	glClearColor(0.5, 0.6, 1.0, 0.0);
 
@@ -797,7 +877,6 @@ void Mouse(int button, int state, int x, int y) {
  * Main function to setup GLUT, GLEW, and enter rendering loop
  *
  *******************************************************************/
-
 
 int main(int argc, char** argv) {
 	/* Initialize GLUT; set double buffered window and RGBA color model */
