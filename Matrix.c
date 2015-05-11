@@ -19,6 +19,10 @@
 #include <string.h>
 #include <math.h>
 
+// Needed for VisualStudioCompiler
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 /******************************************************************
 *
 * SetIdentityMatrix
