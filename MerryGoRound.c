@@ -12,7 +12,7 @@
  * 3. mouse functions
  * 4. automatic zoom (only active in auto-camera mode)
  * 5. floor added
- * 6. background object added
+ * 6. background object added (pyramid with teapot on top)
  *
  * Keys:
  * q or Q: quit program
@@ -391,7 +391,7 @@ void Display() {
 	glBindBuffer(GL_ARRAY_BUFFER, CBO5);
 	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	SetScaling(3.0, 3.0, 3.0, scaling);
+	SetScaling(1.0, 1.0, 1.0, scaling);
 	SetTranslation(10.0, 5.0, -10.0, transform);
 	MultiplyMatrix(transform, scaling, ModelMatrixPyramidTeapot);
 	MultiplyMatrix(transform, ModelMatrixPyramidTeapot, transform);
