@@ -28,6 +28,8 @@
  *******************************************************************/
 #define _USE_MATH_DEFINES
 
+#include "Pati.h"
+
 #ifdef PATI
 #define GLEW_STATIC
 #endif
