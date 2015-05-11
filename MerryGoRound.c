@@ -26,7 +26,11 @@
  * Right-button: Zaxis rotation
  *
  *******************************************************************/
+#define _USE_MATH_DEFINES
+
+#ifdef PATI
 #define GLEW_STATIC
+#endif
 
 /* Standard includes */
 #include <stdio.h>
