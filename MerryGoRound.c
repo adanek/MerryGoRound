@@ -46,6 +46,7 @@
 #include "LoadShader.h"
 #include "Matrix.h"  
 
+
 /* Flag for starting/stopping animation */
 GLboolean anim = GL_FALSE;
 GLboolean auto_anim = GL_TRUE;
@@ -796,6 +797,7 @@ void Mouse(int button, int state, int x, int y) {
  * Main function to setup GLUT, GLEW, and enter rendering loop
  *
  *******************************************************************/
+
 
 int main(int argc, char** argv) {
 	/* Initialize GLUT; set double buffered window and RGBA color model */
