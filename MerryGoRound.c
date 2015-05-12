@@ -26,12 +26,17 @@
  * Right-button: Zaxis rotation
  *
  *******************************************************************/
-#define _USE_MATH_DEFINES
 
-#include "Pati.h"
+
+// Specific host configuration file
+#include "Host.h"
 
 #ifdef PATI
 #define GLEW_STATIC
+#endif
+
+#ifdef ANDI
+#define _USE_MATH_DEFINES
 #endif
 
 
