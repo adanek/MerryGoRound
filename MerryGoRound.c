@@ -889,7 +889,7 @@ int main(int argc, char** argv) {
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 	glutInitWindowSize(600, 600);
 	glutInitWindowPosition(400, 400);
-	glutCreateWindow("Assignment 2 - MerryGoRound");
+	glutCreateWindow("Assignment 3 - MerryGoRound");
 
 	/* Initialize GL extension wrangler */
 	GLenum res = glewInit();
