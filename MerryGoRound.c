@@ -187,15 +187,29 @@ GLushort index_buffer_data2[] = { /* Indices of triangles */
 
 /******************************************************************
  *
- * Display
+ * setAmbientLighting
  *
- * This function is called when the content of the window needs to be
- * drawn/redrawn. It has been specified through 'glutDisplayFunc()';
- * Enable vertex attributes, create binding between C program and
- * attribute name in shader
+ * This function is called if the ambient lighting factor should 
+ * be changed.
  *
  *******************************************************************/
+void setAmbientLighting(GLfloat val){
+	
+	GLint ambientLoc = glGetUniformLocation(ShaderProgram, "ambient");
+	glUniform1f(ambientLoc, val);
+}
 
+
+/******************************************************************
+*
+* Display
+*
+* This function is called when the content of the window needs to be
+* drawn/redrawn. It has been specified through 'glutDisplayFunc()';
+* Enable vertex attributes, create binding between C program and
+* attribute name in shader
+*
+*******************************************************************/
 void Display() {
 	/* Clear window; color specified in 'Initialize()' */
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -781,6 +795,8 @@ void Initialize(void) {
 	float farPlane = 50.0;
 	SetPerspectiveMatrix(fovy, aspect, nearPlane, farPlane, ProjectionMatrix);
 
+	/* Set lighing defaults*/
+	setAmbientLighting(0.2);
 }
 
 /******************************************************************
@@ -805,7 +821,7 @@ void Keyboard(unsigned char key, int x, int y) {
 			anim = GL_TRUE;
 		}
 		auto_anim = GL_FALSE;
-
+		
 		break;
 
 		//activate auto animation again
