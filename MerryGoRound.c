@@ -129,6 +129,7 @@ float ModelMatrixPyramidTop[16];
 float ModelMatrixTop[16];
 float ModelMatrixFloor[16];
 
+
 /*----------------------------------------------------------------*/
 //Buffers for cuboid:
 //Vertex buffer
@@ -197,6 +198,14 @@ void setAmbientLighting(GLfloat val){
 	
 	GLint ambientLoc = glGetUniformLocation(ShaderProgram, "ambient");
 	glUniform1f(ambientLoc, val);
+}
+
+GLfloat getAmbientLighting(){
+
+	GLint ambientLoc = glGetUniformLocation(ShaderProgram, "ambient");
+	GLfloat val;
+	glGetUniformfv(ShaderProgram, ambientLoc, &val);
+	return val;
 }
 
 
@@ -811,6 +820,8 @@ void Initialize(void) {
 
 void Keyboard(unsigned char key, int x, int y) {
 
+	GLfloat ambient = 0.0;
+
 	switch (key) {
 
 	//activate mouse animation
@@ -851,6 +862,27 @@ void Keyboard(unsigned char key, int x, int y) {
 	case 'q':
 	case 'Q':
 		exit(0);
+		break;
+
+	//LIGHTING!!!
+
+	//decrease ambient light
+	case 'a':
+	case 'A':
+		ambient = getAmbientLighting();
+		if(ambient > 0.0){
+			ambient -= 0.2;
+			setAmbientLighting(ambient);
+		}
+		break;
+	//increase ambient light
+	case 's':
+	case 'S':
+		ambient = getAmbientLighting();
+		if(ambient < 1.0){
+			ambient += 0.2;
+			setAmbientLighting(ambient);
+		}
 		break;
 	}
 
@@ -905,7 +937,7 @@ int main(int argc, char** argv) {
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 	glutInitWindowSize(600, 600);
 	glutInitWindowPosition(400, 400);
-	glutCreateWindow("Assignment 2 - MerryGoRound");
+	glutCreateWindow("Assignment 3 - MerryGoRound");
 
 	/* Initialize GL extension wrangler */
 	GLenum res = glewInit();
