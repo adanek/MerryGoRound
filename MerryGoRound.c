@@ -143,8 +143,11 @@ float ModelMatrixFloor[16];
 //Buffers for cuboid:
 //Vertex buffer array
 GLfloat vba_cube[] = { /* 8 cube vertices */-4.0, -0.25, -4.0, -4.0,
-		-0.25, 4.0, -4.0, 0.25, 4.0, -4.0, 0.25, -4.0, 4.0, -0.25, 4.0, 4.0,
-		-0.25, -4.0, 4.0, 0.25, -4.0, 4.0, 0.25,  4.0, };
+-0.25, 4.0, -4.0,
+ 0.25, 4.0, -4.0,
+ 0.25, -4.0, 4.0,
+-0.25, 4.0, 4.0,
+-0.25, -4.0, 4.0, 0.25, -4.0, 4.0, 0.25,  4.0, };
 
 //Color buffer array
 GLfloat cba_cube[] = { /* RGB color values for vertices */
@@ -155,8 +158,20 @@ GLfloat cba_cube[] = { /* RGB color values for vertices */
 
 //Index buffer array
 GLushort iba_cube[] = { /* Indices of triangles */
-0, 1, 2, 2, 3, 0, 1, 4, 7, 7, 2, 1, 7, 6, 5, 5, 4, 7, 4, 5, 0, 0, 1, 4, 2, 7, 6,
-		6, 3, 2, 6, 3, 0, 0, 5, 6, };
+0, 1, 2,
+2, 3, 0,
+1, 4, 7,
+7, 2, 1,
+//7, 6, 5,
+6, 7, 5,
+//5, 4, 7,
+4, 5, 7,
+4, 5, 0,
+0, 1, 4,
+2, 7, 6,
+6, 3, 2,
+6, 3, 0,
+0, 5, 6, };
 
 /*----------------------------------------------------------------*/
 //Buffers for pyramids:
@@ -796,7 +811,7 @@ void Initialize(void) {
 	memset(nba_cube, 0.0f, sizeof(vba_cube));
 
 	//calculate normals for cubes
-	calculateNormals(iba_cube, vba_cube, nba_cube, sizeof(iba_cube) / sizeof(GLushort));
+	//calculateNormals(iba_cube, vba_cube, nba_cube, sizeof(iba_cube) / sizeof(GLushort));
 
 	//normals for pyramid
 	nba_pyramid = (GLfloat*) malloc(sizeof(vba_pyramid));
@@ -804,7 +819,7 @@ void Initialize(void) {
 
 	//normals for teapot
 	nba_teapot = (GLfloat*) malloc(sizeof(vba_teapot));
-	memset(nba_teapot, 0.0, sizeof(vba_teapot));
+	memset(nba_teapot, 0.0, sizeof(*vba_teapot));
 
 	/* Set background (clear) color to blue */
 	glClearColor(0.5, 0.6, 1.0, 0.0);
