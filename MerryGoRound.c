@@ -206,7 +206,12 @@ GLfloat cba_pyramid_back[] = { /* RGB color values for vertices */
 
 //Index buffer
 GLushort iba_pyramid[] = { /* Indices of triangles */
-0, 1, 2, 2, 3, 0, 0, 1, 4, 2, 4, 1, 0, 4, 3, 3, 2, 4, };
+0, 1, 2,
+2, 3, 0,
+0, 1, 4,
+2, 4, 1,
+0, 4, 3,
+3, 2, 4, };
 
 //normal buffers:
 GLfloat *nba_cube;
@@ -815,13 +820,13 @@ void Initialize(void) {
 	memset(nba_pyramid, 0.0, sizeof(vba_pyramid));
 
 	//normals for teapot
-	nba_teapot = (GLfloat*) malloc(sizeof(vba_teapot));
-	memset(nba_teapot, 0.0, sizeof(*vba_teapot));
+	nba_teapot = (GLfloat*) malloc(data.vertex_count*3*sizeof(GLfloat));
+	memset(nba_teapot, 0.0, data.vertex_count*3*sizeof(GLfloat));
 
 	//calculate normals
 	calculateNormals(iba_cube, vba_cube, nba_cube, sizeof(iba_cube) / sizeof(GLushort));
 	calculateNormals(iba_pyramid, vba_pyramid, nba_pyramid, sizeof(iba_pyramid) / sizeof(GLushort));
-	calculateNormals(iba_teapot, vba_teapot, nba_teapot, sizeof(iba_teapot) / sizeof(GLushort));
+	calculateNormals(iba_teapot, vba_teapot, nba_teapot, indx*3);
 
 	/* Set background (clear) color to blue */
 	glClearColor(0.5, 0.6, 1.0, 0.0);
