@@ -4,8 +4,8 @@
 // Do not push changes of this file to github!
 
 
-//#define ANDI;
+#define ANDI
 
-//#define PATI;
+//#define PATI
 
 #endif

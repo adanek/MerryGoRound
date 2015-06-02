@@ -1,7 +1,5 @@
 #version 330
 
-//uniform vec4 Ambient;
-
 in vec4 vColor;
 uniform float ambient;
 
