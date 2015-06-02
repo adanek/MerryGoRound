@@ -171,8 +171,11 @@ GLushort iba_cube[] = { /* Indices of triangles */
 //Buffers for pyramids:
 //Vertex buffer
 GLfloat vba_pyramid[] = { //Definition of a Pyramid
-		-1.0, -2.0, -1.0, 1.0, -2.0, -1.0, 1.0, -2.0, 1.0, -1.0, -2.0, 1.0, 0.0,
-				0.0, 0.0, };
+		-1.0, -2.0, -1.0,
+		 1.0, -2.0, -1.0,
+		 1.0, -2.0, 1.0,
+		-1.0, -2.0, 1.0,
+	  	 0.0,  0.0, 0.0, };
 
 //Color buffer - red pyramid
 GLfloat cba_pyramid_red[] = { /* RGB color values for vertices */
@@ -469,6 +472,11 @@ void Display() {
 	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
 
 	//color buffer
+	glBindBuffer(GL_ARRAY_BUFFER, NBO_PYRAMID);
+	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	setColor(cba_floors);
+
+	//color buffer
 	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID5);
 	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	setColor(cba_floors);
@@ -665,7 +673,7 @@ void SetupDataBuffers() {
 	//normal buffer
 	glGenBuffers(1, &NBO_CUBE);
 	glBindBuffer(GL_ARRAY_BUFFER, NBO_CUBE);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(nba_cube), nba_cube,
+	glBufferData(GL_ARRAY_BUFFER, sizeof(nba_cube) * 3 * sizeof(GLfloat), nba_cube,
 	GL_STATIC_DRAW);
 
 	//Buffers for innter elements:
@@ -685,7 +693,7 @@ void SetupDataBuffers() {
 	//normal buffer
 	glGenBuffers(1, &NBO_PYRAMID);
 	glBindBuffer(GL_ARRAY_BUFFER, NBO_PYRAMID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(nba_pyramid), nba_pyramid,
+	glBufferData(GL_ARRAY_BUFFER, sizeof(nba_pyramid) * 3 * sizeof(GLfloat), nba_pyramid,
 	GL_STATIC_DRAW);
 
 	//color buffer (red)
@@ -842,8 +850,8 @@ void setupLighting() {
 	setAmbientLighting(0.2);
 	setShininess(20.0);
 	setStrength(10.0);
-	setLightColor(1.0, 1.0, 1.0);
-	setLightDirection(0,-1,0);
+	setLightColor(0.4, 0.2, 0.4);
+	setLightDirection(5,10,5);
 }
 
 /******************************************************************
@@ -896,7 +904,7 @@ void Initialize(void) {
 
 	//normals for pyramid
 	nba_pyramid = (GLfloat*) malloc(sizeof(vba_pyramid));
-	memset(nba_pyramid, 0.0, sizeof(vba_pyramid));
+	memset(nba_pyramid, 0.0f, sizeof(vba_pyramid));
 
 	//normals for teapot
 	nba_teapot = (GLfloat*) malloc(data.vertex_count * 3 * sizeof(GLfloat));
