@@ -39,7 +39,9 @@
 
 #ifdef PATI
 #define GLEW_STATIC
+#define _USE_MATH_DEFINES
 #endif
+
 
 #ifdef ANDI
 #define _USE_MATH_DEFINES
@@ -50,7 +52,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 #include <math.h>
 
 /* OpenGL includes */
