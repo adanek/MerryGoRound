@@ -40,7 +40,7 @@ void calculateNormals(GLushort* ida, GLfloat* vba, GLfloat* nba, int len){
 		GLfloat* C = &vba[c * 3];
 
 		// triangeles must have the same orientation
-		if (det3x3(A, B, C)< 0){
+		if (det3x3(A, B, C) < 0){
 
 			puts("Switching orientation");
 			GLfloat* tmp = B;
@@ -58,23 +58,10 @@ void calculateNormals(GLushort* ida, GLfloat* vba, GLfloat* nba, int len){
 		//GLfloat Ny = v1[2] * v2[0] - v1[0] * v2[2];
 		//GLfloat Nz = v1[0] * v2[1] - v1[1] * v2[0];
 
+		addVector3(&vba[a * 3], n);
+		addVector3(&vba[b * 3], n);
+		addVector3(&vba[c * 3], n);
 
-		GLfloat* Na = &vba[a * 3];
-		Na[0] = Na[0] + n.x;
-		Na[1] = Na[1] + n.y;
-		Na[2] = Na[2] + Nz;
-
-		GLfloat* Nb = &vba[b * 3];
-		Nb[0] = Nb[0] + Nx;
-		Nb[1] = Nb[1] + Ny;
-		Nb[2] = Nb[2] + Nz;
-
-		GLfloat* Nc = &vba[c * 3];
-		Nc[0] = Nc[0] + Nx;
-		Nc[1] = Nc[1] + Ny;
-		Nc[2] = Nc[2] + Nz;
-
-		printf("(%4.2f, %4.2f, %4.2f) * (%4.2f, %4.2f, %4.2f) = (%4.2f, %4.2f, %4.2f)\n", v1[0], v1[1], v1[2], v2[0], v2[1], v2[2], Nx, Ny, Nz);
-
-
+		printf("Normal of triangle %d: %5.2f %5.2f %5.2f\n", t, n.x, n.y, n.z);
+	}
 }
