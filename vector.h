@@ -28,3 +28,4 @@
 
 GLfloat det3x3(GLfloat* x, GLfloat* y, GLfloat* z);
 void calculateNormals(GLushort* ida, GLfloat* vba, GLfloat* nba, int len);
+void normailize(GLfloat* nba, int len);
