@@ -810,9 +810,6 @@ void Initialize(void) {
 	nba_cube = (GLfloat*) malloc(sizeof(vba_cube));
 	memset(nba_cube, 0.0f, sizeof(vba_cube));
 
-	//calculate normals for cubes
-	//calculateNormals(iba_cube, vba_cube, nba_cube, sizeof(iba_cube) / sizeof(GLushort));
-
 	//normals for pyramid
 	nba_pyramid = (GLfloat*) malloc(sizeof(vba_pyramid));
 	memset(nba_pyramid, 0.0, sizeof(vba_pyramid));
@@ -820,6 +817,11 @@ void Initialize(void) {
 	//normals for teapot
 	nba_teapot = (GLfloat*) malloc(sizeof(vba_teapot));
 	memset(nba_teapot, 0.0, sizeof(*vba_teapot));
+
+	//calculate normals
+	calculateNormals(iba_cube, vba_cube, nba_cube, sizeof(iba_cube) / sizeof(GLushort));
+	calculateNormals(iba_pyramid, vba_pyramid, nba_pyramid, sizeof(iba_pyramid) / sizeof(GLushort));
+	calculateNormals(iba_teapot, vba_teapot, nba_teapot, sizeof(iba_teapot) / sizeof(GLushort));
 
 	/* Set background (clear) color to blue */
 	glClearColor(0.5, 0.6, 1.0, 0.0);
