@@ -50,6 +50,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <math.h>
 
 /* OpenGL includes */
@@ -86,10 +87,10 @@ GLuint CBO, CBO2, CBO3, CBO4, CBO5, CBO6, CBO7;
 GLuint IBO, IBO2, IBO_TEAPOT;
 
 /* Arrays for holding vertex data of the two models */
-GLfloat *vertex_buffer_teapot;
+GLfloat *vba_teapot;
 
 /* Arrays for holding indices of the two models */
-GLushort *index_buffer_teapot;
+GLushort *iba_teapot;
 
 //objects
 obj_scene_data data;
@@ -189,6 +190,11 @@ GLfloat cba_pyramid_back[] = { /* RGB color values for vertices */
 //Index buffer
 GLushort iba_pyramid[] = { /* Indices of triangles */
 0, 1, 2, 2, 3, 0, 0, 1, 4, 2, 4, 1, 0, 4, 3, 3, 2, 4, };
+
+//normal buffers:
+GLfloat *nba_cube;
+GLfloat *nba_pyramid;
+GLfloat *nba_teapot;
 
 /*----------------------------------------------------------------*/
 
@@ -631,12 +637,12 @@ void SetupDataBuffers() {
 	//vertex buffer for teapot
     glGenBuffers(1, &VBO_TEAPOT);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_TEAPOT);
-    glBufferData(GL_ARRAY_BUFFER, data.vertex_count*3*sizeof(GLfloat), vertex_buffer_teapot, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, data.vertex_count*3*sizeof(GLfloat), vba_teapot, GL_STATIC_DRAW);
 
     //index buffer for teapot
     glGenBuffers(1, &IBO_TEAPOT);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_TEAPOT);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.face_count*3*sizeof(GLushort), index_buffer_teapot, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.face_count*3*sizeof(GLushort), iba_teapot, GL_STATIC_DRAW);
 
 }
 
@@ -760,26 +766,40 @@ void Initialize(void) {
 	int vert = data.vertex_count;
 	int indx = data.face_count;
 
-	vertex_buffer_teapot = (GLfloat*) calloc(vert * 3, sizeof(GLfloat));
-	index_buffer_teapot = (GLushort*) calloc(indx * 3, sizeof(GLushort));
+	vba_teapot = (GLfloat*) calloc(vert * 3, sizeof(GLfloat));
+	iba_teapot = (GLushort*) calloc(indx * 3, sizeof(GLushort));
 
 	/* Vertices */
 	for (i = 0; i < vert; i++) {
-		vertex_buffer_teapot[i * 3] = (GLfloat) (*data.vertex_list[i]).e[0];
-		vertex_buffer_teapot[i * 3 + 1] = (GLfloat) (*data.vertex_list[i]).e[1];
-		vertex_buffer_teapot[i * 3 + 2] = (GLfloat) (*data.vertex_list[i]).e[2];
+		vba_teapot[i * 3] = (GLfloat) (*data.vertex_list[i]).e[0];
+		vba_teapot[i * 3 + 1] = (GLfloat) (*data.vertex_list[i]).e[1];
+		vba_teapot[i * 3 + 2] = (GLfloat) (*data.vertex_list[i]).e[2];
 	}
 
 	/* Indices */
 	for (i = 0; i < indx; i++) {
-		index_buffer_teapot[i * 3] =
+		iba_teapot[i * 3] =
 				(GLushort) (*data.face_list[i]).vertex_index[0];
-		index_buffer_teapot[i * 3 + 1] =
+		iba_teapot[i * 3 + 1] =
 				(GLushort) (*data.face_list[i]).vertex_index[1];
-		index_buffer_teapot[i * 3 + 2] =
+		iba_teapot[i * 3 + 2] =
 				(GLushort) (*data.face_list[i]).vertex_index[2];
 	}
 
+
+	//normal buffers
+
+	//normals for cube
+	nba_cube = (GLfloat*) malloc(sizeof(vba_cube));
+	memset(nba_cube, 0.0, sizeof(vba_cube));
+
+	//normals for pyramid
+	nba_pyramid = (GLfloat*) malloc(sizeof(vba_pyramid));
+	memset(nba_pyramid, 0.0, sizeof(vba_pyramid));
+
+	//normals for teapot
+	nba_teapot = (GLfloat*) malloc(sizeof(vba_teapot));
+	memset(nba_teapot, 0.0, sizeof(vba_teapot));
 
 	/* Set background (clear) color to blue */
 	glClearColor(0.5, 0.6, 1.0, 0.0);
