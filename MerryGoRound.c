@@ -33,7 +33,6 @@
  *
  *******************************************************************/
 
-
 // Specific host configuration file
 #include "Host.h"
 #include "vector.h"
@@ -43,11 +42,9 @@
 #define _USE_MATH_DEFINES
 #endif
 
-
 #ifdef ANDI
 #define _USE_MATH_DEFINES
 #endif
-
 
 /* Standard includes */
 #include <stdio.h>
@@ -141,54 +138,34 @@ float ModelMatrixPyramidTop[16];
 float ModelMatrixTop[16];
 float ModelMatrixFloor[16];
 
+float NormalMatrix[9];
 
 /*----------------------------------------------------------------*/
 //Buffers for cuboid:
 //Vertex buffer array
 GLfloat vba_cube[] = { /* 8 cube vertices */
--4.0, -0.25, -4.0,
--4.0, -0.25, 4.0,
--4.0, 0.25, 4.0,
--4.0, 0.25, -4.0,
-4.0, -0.25, 4.0,
-4.0, -0.25, -4.0,
-4.0, 0.25, -4.0,
-4.0, 0.25,  4.0, };
+-4.0, -0.25, -4.0, -4.0, -0.25, 4.0, -4.0, 0.25, 4.0, -4.0, 0.25, -4.0, 4.0,
+		-0.25, 4.0, 4.0, -0.25, -4.0, 4.0, 0.25, -4.0, 4.0, 0.25,  4.0, };
 
 //Color buffer array
 GLfloat cba_cube[] = { /* RGB color values for vertices */
-0.4, 0.2, 0.4,
-0.3, 0.3, 0.4,
-0.4, 0.2, 0.4,
-0.3, 0.3, 0.4,
-0.4, 0.2, 0.4,
-0.3, 0.3, 0.4,
-0.4, 0.2, 0.4,
-0.3, 0.3, 0.4, };
+0.4, 0.2, 0.4, 0.3, 0.3, 0.4, 0.4, 0.2, 0.4, 0.3, 0.3, 0.4, 0.4, 0.2, 0.4, 0.3,
+		0.3, 0.4, 0.4, 0.2, 0.4, 0.3, 0.3, 0.4, };
 
 GLfloat cba_purple[] = { 0.4, 0.2, 0.4 };
-GLfloat cba_red[] = {1.0, 0.0, 0.0, 1.0 };
-GLfloat cba_green[] = {0.0, 1.0, 0.0, 1.0 };
-GLfloat cba_blue[] = {0.0, 0.0, 1.0, 1.0 };
-GLfloat cba_black[] = {0.0, 0.0, 0.0, 1.0 };
-GLfloat cba_floors[] = {0.5, 0.5, 0.0, 1.0 };
+GLfloat cba_red[] = { 1.0, 0.0, 0.0, 1.0 };
+GLfloat cba_green[] = { 0.0, 1.0, 0.0, 1.0 };
+GLfloat cba_blue[] = { 0.0, 0.0, 1.0, 1.0 };
+GLfloat cba_black[] = { 0.0, 0.0, 0.0, 1.0 };
+GLfloat cba_floors[] = { 0.5, 0.5, 0.0, 1.0 };
 
 //Index buffer array
 GLushort iba_cube[] = { /* Indices of triangles */
-0, 1, 2,
-2, 3, 0,
-1, 4, 7,
-7, 2, 1,
+0, 1, 2, 2, 3, 0, 1, 4, 7, 7, 2, 1,
 //7, 6, 5,
-6, 7, 5,
+		6, 7, 5,
 //5, 4, 7,
-4, 5, 7,
-4, 5, 0,
-0, 1, 4,
-2, 7, 6,
-6, 3, 2,
-6, 3, 0,
-0, 5, 6, };
+		4, 5, 7, 4, 5, 0, 0, 1, 4, 2, 7, 6, 6, 3, 2, 6, 3, 0, 0, 5, 6, };
 
 /*----------------------------------------------------------------*/
 //Buffers for pyramids:
@@ -214,27 +191,15 @@ GLfloat cba_pyramid_black[] = { /* RGB color values for vertices */
 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, };
 
 //Color buffer
-GLfloat cba_floor[] = {
-1.0, 0.0, 0.0,
-1.0, 0.0, 0.0,
-1.0, 0.0, 0.0,
-1.0, 0.0, 0.0,
-0.0, 1.0, 0.0,
-0.0, 1.0, 0.0,
-0.0, 1.0, 0.0,
-0.0, 1.0, 0.0, };
+GLfloat cba_floor[] = { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+		0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, };
 
 GLfloat cba_pyramid_back[] = { /* RGB color values for vertices */
 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, };
 
 //Index buffer
 GLushort iba_pyramid[] = { /* Indices of triangles */
-0, 1, 2,
-2, 3, 0,
-0, 1, 4,
-2, 4, 1,
-0, 4, 3,
-3, 2, 4, };
+0, 1, 2, 2, 3, 0, 0, 1, 4, 2, 4, 1, 0, 4, 3, 3, 2, 4, };
 
 //normal buffers:
 GLfloat *nba_cube;
@@ -251,13 +216,40 @@ GLfloat *nba_teapot;
  * be changed.
  *
  *******************************************************************/
-void setAmbientLighting(GLfloat val){
-	
+void setAmbientLighting(GLfloat val) {
+
 	GLint ambientLoc = glGetUniformLocation(ShaderProgram, "ambient");
 	glUniform1f(ambientLoc, val);
 }
 
-GLfloat getAmbientLighting(){
+void setShininess(GLfloat val) {
+
+	GLint ShininessLoc = glGetUniformLocation(ShaderProgram, "Shininess");
+	glUniform1f(ShininessLoc, val);
+}
+
+void setStrength(GLfloat val) {
+
+	GLint StrengthLoc = glGetUniformLocation(ShaderProgram, "Strength");
+	glUniform1f(StrengthLoc, val);
+}
+
+void setLightColor(GLfloat r, GLfloat g, GLfloat b) {
+
+	GLint LightColorLoc = glGetUniformLocation(ShaderProgram, "LightColor");
+	glUniform3f(LightColorLoc, r, g, b);
+
+}
+
+void setLightDirection(GLfloat x, GLfloat y, GLfloat z) {
+
+	GLint LightDirectionLoc = glGetUniformLocation(ShaderProgram,
+			"LightDirection");
+	glUniform3f(LightDirectionLoc, x, y, z);
+
+}
+
+GLfloat getAmbientLighting() {
 
 	GLint ambientLoc = glGetUniformLocation(ShaderProgram, "ambient");
 	GLfloat val;
@@ -265,23 +257,22 @@ GLfloat getAmbientLighting(){
 	return val;
 }
 
-void setColor(GLfloat* val){
+void setColor(GLfloat* val) {
 
 	GLint ColorLoc = glGetUniformLocation(ShaderProgram, "FixedColor");
 	glUniform4f(ColorLoc, val[0], val[1], val[2], val[3]);
 }
 
-
 /******************************************************************
-*
-* Display
-*
-* This function is called when the content of the window needs to be
-* drawn/redrawn. It has been specified through 'glutDisplayFunc()';
-* Enable vertex attributes, create binding between C program and
-* attribute name in shader
-*
-*******************************************************************/
+ *
+ * Display
+ *
+ * This function is called when the content of the window needs to be
+ * drawn/redrawn. It has been specified through 'glutDisplayFunc()';
+ * Enable vertex attributes, create binding between C program and
+ * attribute name in shader
+ *
+ *******************************************************************/
 void Display() {
 	/* Clear window; color specified in 'Initialize()' */
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -324,6 +315,13 @@ void Display() {
 		fprintf(stderr, "Could not bind uniform ModelMatrix\n");
 		exit(-1);
 	}
+
+	GLint NormalUniform = glGetUniformLocation(ShaderProgram, "NormalMatrix");
+	if (NormalUniform == -1) {
+		fprintf(stderr, "Could not bind uniform NormalMatrix\n");
+		exit(-1);
+	}
+	glUniformMatrix3fv(ViewUniform, 1, GL_TRUE, NormalMatrix);
 
 	//Screen elements:
 
@@ -579,6 +577,10 @@ void OnIdle() {
 	int delta = newTime - oldTime;
 	oldTime = newTime;
 
+//BEGIN TO BE DELETED
+	delta = 0.0f;
+//END TO BE DELETED
+
 	//manual animation
 	if (anim) {
 		/* Increment rotation angles and update matrix */
@@ -608,6 +610,11 @@ void OnIdle() {
 
 	//automatic zoom
 	float zoom = 0.0005;
+
+	//BEGIN TO BE DELETED
+	zoom = 0.0f;
+	//END TO BE DELETED
+
 	if (auto_anim) {
 		//change zoom direction
 		if (distance > -15 || distance < -20) {
@@ -618,6 +625,7 @@ void OnIdle() {
 	}
 
 	//translation of the whole object
+	//SetTranslation(0.0, -3.0, distance, ViewMatrix);
 	SetTranslation(0.0, -3.0, distance, ViewMatrix);
 	MultiplyMatrix(ViewMatrix, rotation, ViewMatrix);
 
@@ -640,14 +648,13 @@ void SetupDataBuffers() {
 	//vertex buffer
 	glGenBuffers(1, &VBO_CUBE);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_CUBE);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vba_cube),
-			vba_cube, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vba_cube), vba_cube, GL_STATIC_DRAW);
 
 	//index buffer
 	glGenBuffers(1, &IBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(iba_cube),
-			iba_cube, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(iba_cube), iba_cube,
+			GL_STATIC_DRAW);
 
 	//color buffer
 	glGenBuffers(1, &CBO_CUBE);
@@ -666,14 +673,14 @@ void SetupDataBuffers() {
 	//vertex buffer (pyramid)
 	glGenBuffers(1, &VBO_PYRAMID);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_PYRAMID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vba_pyramid),
-			vba_pyramid, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vba_pyramid), vba_pyramid,
+			GL_STATIC_DRAW);
 
 	//index buffer
 	glGenBuffers(1, &IBO2);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO2);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(iba_pyramid),
-			iba_pyramid, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(iba_pyramid), iba_pyramid,
+			GL_STATIC_DRAW);
 
 	//normal buffer
 	glGenBuffers(1, &NBO_PYRAMID);
@@ -684,54 +691,55 @@ void SetupDataBuffers() {
 	//color buffer (red)
 	glGenBuffers(1, &CBO_PYRAMID);
 	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_pyramid_red),
-			cba_pyramid_red, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_pyramid_red), cba_pyramid_red,
+			GL_STATIC_DRAW);
 
 	//color buffer (green)
 	glGenBuffers(1, &CBO_PYRAMID2);
 	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID2);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_pyramid_green),
-			cba_pyramid_green, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_pyramid_green), cba_pyramid_green,
+			GL_STATIC_DRAW);
 
 	//color buffer (blue)
 	glGenBuffers(1, &CBO_PYRAMID3);
 	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID3);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_pyramid_blue),
-			cba_pyramid_blue, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_pyramid_blue), cba_pyramid_blue,
+			GL_STATIC_DRAW);
 
 	//color buffer (black)
 	glGenBuffers(1, &CBO_PYRAMID4);
 	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID4);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_pyramid_black),
-			cba_pyramid_black, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_pyramid_black), cba_pyramid_black,
+			GL_STATIC_DRAW);
 
 	//color buffer (white)
 	glGenBuffers(1, &CBO_PYRAMID5);
 	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID5);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_floor),
-			cba_floor, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_floor), cba_floor, GL_STATIC_DRAW);
 
 	//color buffer (multicolor)
 	glGenBuffers(1, &CBO_PYRAMID6);
 	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID6);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_pyramid_back),
-			cba_pyramid_back, GL_STATIC_DRAW);
-
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_pyramid_back), cba_pyramid_back,
+			GL_STATIC_DRAW);
 
 	//vertex buffer for teapot
-    glGenBuffers(1, &VBO_TEAPOT);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_TEAPOT);
-    glBufferData(GL_ARRAY_BUFFER, data.vertex_count*3*sizeof(GLfloat), vba_teapot, GL_STATIC_DRAW);
+	glGenBuffers(1, &VBO_TEAPOT);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_TEAPOT);
+	glBufferData(GL_ARRAY_BUFFER, data.vertex_count * 3 * sizeof(GLfloat),
+			vba_teapot, GL_STATIC_DRAW);
 
-    //index buffer for teapot
-    glGenBuffers(1, &IBO_TEAPOT);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_TEAPOT);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.face_count*3*sizeof(GLushort), iba_teapot, GL_STATIC_DRAW);
+	//index buffer for teapot
+	glGenBuffers(1, &IBO_TEAPOT);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_TEAPOT);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+			data.face_count * 3 * sizeof(GLushort), iba_teapot, GL_STATIC_DRAW);
 
 	//normal buffer
 	glGenBuffers(1, &NBO_TEAPOT);
 	glBindBuffer(GL_ARRAY_BUFFER, NBO_TEAPOT);
-	glBufferData(GL_ARRAY_BUFFER, data.vertex_count*3*sizeof(GLfloat), nba_teapot, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, data.vertex_count * 3 * sizeof(GLfloat),
+			nba_teapot, GL_STATIC_DRAW);
 
 }
 
@@ -829,6 +837,15 @@ void CreateShaderProgram() {
 	glUseProgram(ShaderProgram);
 }
 
+void setupLighting() {
+	/* Set lighing defaults*/
+	setAmbientLighting(0.2);
+	setShininess(20.0);
+	setStrength(10.0);
+	setLightColor(1.0, 1.0, 1.0);
+	setLightDirection(0.0, -60.0, -20.0);
+}
+
 /******************************************************************
  *
  * Initialize
@@ -842,7 +859,6 @@ void Initialize(void) {
 
 	int i;
 	int success;
-
 
 	/* Load first OBJ model */
 	char* filename = "models/teapot.obj";
@@ -867,14 +883,10 @@ void Initialize(void) {
 
 	/* Indices */
 	for (i = 0; i < indx; i++) {
-		iba_teapot[i * 3] =
-				(GLushort) (*data.face_list[i]).vertex_index[0];
-		iba_teapot[i * 3 + 1] =
-				(GLushort) (*data.face_list[i]).vertex_index[1];
-		iba_teapot[i * 3 + 2] =
-				(GLushort) (*data.face_list[i]).vertex_index[2];
+		iba_teapot[i * 3] = (GLushort) (*data.face_list[i]).vertex_index[0];
+		iba_teapot[i * 3 + 1] = (GLushort) (*data.face_list[i]).vertex_index[1];
+		iba_teapot[i * 3 + 2] = (GLushort) (*data.face_list[i]).vertex_index[2];
 	}
-
 
 	//normal buffers
 
@@ -887,13 +899,17 @@ void Initialize(void) {
 	memset(nba_pyramid, 0.0, sizeof(vba_pyramid));
 
 	//normals for teapot
-	nba_teapot = (GLfloat*) malloc(data.vertex_count*3*sizeof(GLfloat));
-	memset(nba_teapot, 0.0, data.vertex_count*3*sizeof(GLfloat));
+	nba_teapot = (GLfloat*) malloc(data.vertex_count * 3 * sizeof(GLfloat));
+	memset(nba_teapot, 0.0, data.vertex_count * 3 * sizeof(GLfloat));
 
 	//calculate normals
-	calculateNormals(iba_cube, vba_cube, nba_cube, sizeof(iba_cube) / sizeof(GLushort), sizeof(vba_cube) / sizeof(GLfloat));
-	calculateNormals(iba_pyramid, vba_pyramid, nba_pyramid, sizeof(iba_pyramid) / sizeof(GLushort), sizeof(vba_pyramid) / sizeof(GLfloat));
-	calculateNormals(iba_teapot, vba_teapot, nba_teapot, indx*3, vert*3);
+	calculateNormals(iba_cube, vba_cube, nba_cube,
+			sizeof(iba_cube) / sizeof(GLushort),
+			sizeof(vba_cube) / sizeof(GLfloat));
+	calculateNormals(iba_pyramid, vba_pyramid, nba_pyramid,
+			sizeof(iba_pyramid) / sizeof(GLushort),
+			sizeof(vba_pyramid) / sizeof(GLfloat));
+	calculateNormals(iba_teapot, vba_teapot, nba_teapot, indx * 3, vert * 3);
 
 	/* Set background (clear) color to blue */
 	glClearColor(0.5, 0.6, 1.0, 0.0);
@@ -912,6 +928,7 @@ void Initialize(void) {
 	SetIdentityMatrix(ProjectionMatrix);
 	SetIdentityMatrix(ViewMatrix);
 	SetIdentityMatrix(ModelMatrix);
+	SetIdentityMatrix3x3(NormalMatrix);
 
 	/* Initialize animation matrices */
 	SetIdentityMatrix(RotationMatrixAnimX);
@@ -926,7 +943,7 @@ void Initialize(void) {
 	SetPerspectiveMatrix(fovy, aspect, nearPlane, farPlane, ProjectionMatrix);
 
 	/* Set lighing defaults*/
-	setAmbientLighting(0.2);
+	setupLighting();
 }
 
 /******************************************************************
@@ -953,7 +970,7 @@ void Keyboard(unsigned char key, int x, int y) {
 			anim = GL_TRUE;
 		}
 		auto_anim = GL_FALSE;
-		
+
 		break;
 
 		//activate auto animation again
@@ -985,22 +1002,22 @@ void Keyboard(unsigned char key, int x, int y) {
 		exit(0);
 		break;
 
-	//LIGHTING!!!
+		//LIGHTING!!!
 
-	//decrease ambient light
+		//decrease ambient light
 	case 'a':
 	case 'A':
 		ambient = getAmbientLighting();
-		if(ambient > 0.0){
+		if (ambient > 0.0) {
 			ambient -= 0.2;
 			setAmbientLighting(ambient);
 		}
 		break;
-	//increase ambient light
+		//increase ambient light
 	case 's':
 	case 'S':
 		ambient = getAmbientLighting();
-		if(ambient < 1.0){
+		if (ambient < 1.0) {
 			ambient += 0.2;
 			setAmbientLighting(ambient);
 		}

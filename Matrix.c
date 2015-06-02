@@ -41,6 +41,16 @@ void SetIdentityMatrix(float* result)
     memcpy(result, identity, 16*sizeof(float));
 }
 
+void SetIdentityMatrix3x3(float* result)
+{
+    float identity[9] = {
+    1.0, 0.0, 0.0,
+	0.0, 1.0, 0.0,
+	0.0, 0.0, 1.0,
+    };
+
+    memcpy(result, identity, 9*sizeof(float));
+}
 
 /******************************************************************
 *

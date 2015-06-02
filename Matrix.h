@@ -18,6 +18,7 @@
 #define __MATRIX_H__
 
 void SetIdentityMatrix(float* result);
+void SetIdentityMatrix3x3(float* result);
 void SetRotationX(float anglex, float* result);
 void SetRotationY(float angley, float* result);
 void SetRotationZ(float anglez, float* result);
