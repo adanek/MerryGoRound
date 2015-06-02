@@ -811,7 +811,7 @@ void Initialize(void) {
 	memset(nba_cube, 0.0f, sizeof(vba_cube));
 
 	//calculate normals for cubes
-	//calculateNormals(iba_cube, vba_cube, nba_cube, sizeof(iba_cube) / sizeof(GLushort));
+	calculateNormals(iba_cube, vba_cube, nba_cube, sizeof(iba_cube) / sizeof(GLushort));
 
 	//normals for pyramid
 	nba_pyramid = (GLfloat*) malloc(sizeof(vba_pyramid));
