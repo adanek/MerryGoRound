@@ -843,7 +843,7 @@ void setupLighting() {
 	setShininess(20.0);
 	setStrength(10.0);
 	setLightColor(1.0, 1.0, 1.0);
-	setLightDirection(0.0, -60.0, -20.0);
+	setLightDirection(0,-1,0);
 }
 
 /******************************************************************
