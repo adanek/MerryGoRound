@@ -80,10 +80,13 @@ int oldTime = 0;
 /*----------------------------------------------------------------*/
 
 /* Define handles to vertex buffer objects */
-GLuint VBO, VBO2, VBO_TEAPOT;
+GLuint VBO_CUBE, VBO_PYRAMID, VBO_TEAPOT;
 
 /* Define handles to color buffer objects */
-GLuint CBO, CBO2, CBO3, CBO4, CBO5, CBO6, CBO7;
+GLuint CBO_CUBE, CBO_PYRAMID, CBO_PYRAMID2, CBO_PYRAMID3, CBO_PYRAMID4, CBO_PYRAMID5, CBO_PYRAMID6;
+
+/* Define handles to color buffer objects */
+GLuint NBO_CUBE, NBO_PYRAMID, NBO_TEAPOT;
 
 /* Define handles to index buffer objects */
 GLuint IBO, IBO2, IBO_TEAPOT;
@@ -99,7 +102,7 @@ obj_scene_data data;
 
 /* Indices to vertex attributes; in this case positon and color */
 enum DataID {
-	vPosition = 0, vColor = 1
+	vPosition = 0, vColor = 1, vNormal = 2,
 };
 
 /* Strings for loading and storing shader code */
@@ -142,19 +145,33 @@ float ModelMatrixFloor[16];
 /*----------------------------------------------------------------*/
 //Buffers for cuboid:
 //Vertex buffer array
-GLfloat vba_cube[] = { /* 8 cube vertices */-4.0, -0.25, -4.0, -4.0,
--0.25, 4.0, -4.0,
- 0.25, 4.0, -4.0,
- 0.25, -4.0, 4.0,
--0.25, 4.0, 4.0,
--0.25, -4.0, 4.0, 0.25, -4.0, 4.0, 0.25,  4.0, };
+GLfloat vba_cube[] = { /* 8 cube vertices */
+-4.0, -0.25, -4.0,
+-4.0, -0.25, 4.0,
+-4.0, 0.25, 4.0,
+-4.0, 0.25, -4.0,
+4.0, -0.25, 4.0,
+4.0, -0.25, -4.0,
+4.0, 0.25, -4.0,
+4.0, 0.25,  4.0, };
 
 //Color buffer array
 GLfloat cba_cube[] = { /* RGB color values for vertices */
-0.4, 0.2, 0.4, 0.3, 0.3, 0.4, 0.4, 0.2, 0.4, 0.3, 0.3, 0.4, 0.4, 0.2, 0.4, 0.3,
-		0.3, 0.4,
+0.4, 0.2, 0.4,
+0.3, 0.3, 0.4,
+0.4, 0.2, 0.4,
+0.3, 0.3, 0.4,
+0.4, 0.2, 0.4,
+0.3, 0.3, 0.4,
 0.4, 0.2, 0.4,
 0.3, 0.3, 0.4, };
+
+GLfloat cba_purple[] = { 0.4, 0.2, 0.4 };
+GLfloat cba_red[] = {1.0, 0.0, 0.0, 1.0 };
+GLfloat cba_green[] = {0.0, 1.0, 0.0, 1.0 };
+GLfloat cba_blue[] = {0.0, 0.0, 1.0, 1.0 };
+GLfloat cba_black[] = {0.0, 0.0, 0.0, 1.0 };
+GLfloat cba_floors[] = {0.5, 0.5, 0.0, 1.0 };
 
 //Index buffer array
 GLushort iba_cube[] = { /* Indices of triangles */
@@ -197,9 +214,15 @@ GLfloat cba_pyramid_black[] = { /* RGB color values for vertices */
 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, };
 
 //Color buffer
-GLfloat cba_floor[] = { /* RGB color values for vertices */
-1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-		1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, };
+GLfloat cba_floor[] = {
+1.0, 0.0, 0.0,
+1.0, 0.0, 0.0,
+1.0, 0.0, 0.0,
+1.0, 0.0, 0.0,
+0.0, 1.0, 0.0,
+0.0, 1.0, 0.0,
+0.0, 1.0, 0.0,
+0.0, 1.0, 0.0, };
 
 GLfloat cba_pyramid_back[] = { /* RGB color values for vertices */
 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, };
@@ -242,6 +265,12 @@ GLfloat getAmbientLighting(){
 	return val;
 }
 
+void setColor(GLfloat* val){
+
+	GLint ColorLoc = glGetUniformLocation(ShaderProgram, "FixedColor");
+	glUniform4f(ColorLoc, val[0], val[1], val[2], val[3]);
+}
+
 
 /******************************************************************
 *
@@ -258,12 +287,17 @@ void Display() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glEnableVertexAttribArray(vPosition);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_CUBE);
 	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glEnableVertexAttribArray(vColor);
-	glBindBuffer(GL_ARRAY_BUFFER, CBO);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_CUBE);
 	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	setColor(cba_purple);
+
+	glEnableVertexAttribArray(vNormal);
+	glBindBuffer(GL_ARRAY_BUFFER, NBO_CUBE);
+	glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 	GLint size;
@@ -341,8 +375,11 @@ void Display() {
 	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
 
 	//switch to pyramid buffers
-	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_PYRAMID);
 	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, NBO_PYRAMID);
+	glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO2);
 	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
@@ -354,8 +391,9 @@ void Display() {
 	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
 
 	//switch color buffer
-	glBindBuffer(GL_ARRAY_BUFFER, CBO2);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID);
 	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	setColor(cba_red);
 
 	//transformation
 	SetScaling(1.0, 1.0, 1.0, scaling);
@@ -373,8 +411,9 @@ void Display() {
 	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
 
 	//switch color buffer
-	glBindBuffer(GL_ARRAY_BUFFER, CBO3);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID2);
 	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	setColor(cba_green);
 
 	//pyramid 2
 	MultiplyMatrix(ModelMatrixPyramid2, transform, ModelMatrix);
@@ -383,8 +422,9 @@ void Display() {
 	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
 
 	//switch color buffer
-	glBindBuffer(GL_ARRAY_BUFFER, CBO4);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID3);
 	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	setColor(cba_blue);
 
 	//pyramid 3
 	MultiplyMatrix(ModelMatrixPyramid3, transform, ModelMatrix);
@@ -393,8 +433,9 @@ void Display() {
 	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
 
 	//switch color buffer
-	glBindBuffer(GL_ARRAY_BUFFER, CBO5);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID4);
 	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	setColor(cba_black);
 
 	//pyramid 4
 	MultiplyMatrix(ModelMatrixPyramid4, transform, ModelMatrix);
@@ -406,7 +447,7 @@ void Display() {
 	//pyramid 5 - static
 
 	//color buffer
-	glBindBuffer(GL_ARRAY_BUFFER, CBO7);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID6);
 	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	SetScaling(3.0, 3.0, 3.0, scaling);
@@ -419,16 +460,20 @@ void Display() {
 	//switch buffers
 
 	//vertex buffer
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_CUBE);
 	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, NBO_CUBE);
+	glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	//index buffer
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
 
 	//color buffer
-	glBindBuffer(GL_ARRAY_BUFFER, CBO6);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID5);
 	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	setColor(cba_floors);
 
 	//floor
 	SetScaling(50.0, 1.0, 50.0, scaling);
@@ -446,12 +491,16 @@ void Display() {
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_TEAPOT);
 	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
+	glBindBuffer(GL_ARRAY_BUFFER, NBO_TEAPOT);
+	glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_TEAPOT);
 	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
 
 	//switch color buffer
-	glBindBuffer(GL_ARRAY_BUFFER, CBO5);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID4);
 	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	setColor(cba_purple);
 
 	SetScaling(1.0, 1.0, 1.0, scaling);
 	SetTranslation(10.0, 5.0, -10.0, transform);
@@ -465,6 +514,7 @@ void Display() {
 	/* Disable attributes */
 	glDisableVertexAttribArray(vPosition);
 	glDisableVertexAttribArray(vColor);
+	glDisableVertexAttribArray(vNormal);
 
 	/* Swap between front and back buffer */
 	glutSwapBuffers();
@@ -588,8 +638,8 @@ void SetupDataBuffers() {
 	//Buffers for platforms:
 
 	//vertex buffer
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glGenBuffers(1, &VBO_CUBE);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_CUBE);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vba_cube),
 			vba_cube, GL_STATIC_DRAW);
 
@@ -600,16 +650,22 @@ void SetupDataBuffers() {
 			iba_cube, GL_STATIC_DRAW);
 
 	//color buffer
-	glGenBuffers(1, &CBO);
-	glBindBuffer(GL_ARRAY_BUFFER, CBO);
+	glGenBuffers(1, &CBO_CUBE);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_CUBE);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_cube), cba_cube,
+	GL_STATIC_DRAW);
+
+	//normal buffer
+	glGenBuffers(1, &NBO_CUBE);
+	glBindBuffer(GL_ARRAY_BUFFER, NBO_CUBE);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(nba_cube), nba_cube,
 	GL_STATIC_DRAW);
 
 	//Buffers for innter elements:
 
 	//vertex buffer (pyramid)
-	glGenBuffers(1, &VBO2);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+	glGenBuffers(1, &VBO_PYRAMID);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_PYRAMID);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vba_pyramid),
 			vba_pyramid, GL_STATIC_DRAW);
 
@@ -619,39 +675,45 @@ void SetupDataBuffers() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(iba_pyramid),
 			iba_pyramid, GL_STATIC_DRAW);
 
+	//normal buffer
+	glGenBuffers(1, &NBO_PYRAMID);
+	glBindBuffer(GL_ARRAY_BUFFER, NBO_PYRAMID);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(nba_pyramid), nba_pyramid,
+	GL_STATIC_DRAW);
+
 	//color buffer (red)
-	glGenBuffers(1, &CBO2);
-	glBindBuffer(GL_ARRAY_BUFFER, CBO2);
+	glGenBuffers(1, &CBO_PYRAMID);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_pyramid_red),
 			cba_pyramid_red, GL_STATIC_DRAW);
 
 	//color buffer (green)
-	glGenBuffers(1, &CBO3);
-	glBindBuffer(GL_ARRAY_BUFFER, CBO3);
+	glGenBuffers(1, &CBO_PYRAMID2);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_pyramid_green),
 			cba_pyramid_green, GL_STATIC_DRAW);
 
 	//color buffer (blue)
-	glGenBuffers(1, &CBO4);
-	glBindBuffer(GL_ARRAY_BUFFER, CBO4);
+	glGenBuffers(1, &CBO_PYRAMID3);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID3);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_pyramid_blue),
 			cba_pyramid_blue, GL_STATIC_DRAW);
 
 	//color buffer (black)
-	glGenBuffers(1, &CBO5);
-	glBindBuffer(GL_ARRAY_BUFFER, CBO5);
+	glGenBuffers(1, &CBO_PYRAMID4);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID4);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_pyramid_black),
 			cba_pyramid_black, GL_STATIC_DRAW);
 
 	//color buffer (white)
-	glGenBuffers(1, &CBO6);
-	glBindBuffer(GL_ARRAY_BUFFER, CBO6);
+	glGenBuffers(1, &CBO_PYRAMID5);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID5);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_floor),
 			cba_floor, GL_STATIC_DRAW);
 
 	//color buffer (multicolor)
-	glGenBuffers(1, &CBO7);
-	glBindBuffer(GL_ARRAY_BUFFER, CBO7);
+	glGenBuffers(1, &CBO_PYRAMID6);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID6);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_pyramid_back),
 			cba_pyramid_back, GL_STATIC_DRAW);
 
@@ -665,6 +727,11 @@ void SetupDataBuffers() {
     glGenBuffers(1, &IBO_TEAPOT);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_TEAPOT);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.face_count*3*sizeof(GLushort), iba_teapot, GL_STATIC_DRAW);
+
+	//normal buffer
+	glGenBuffers(1, &NBO_TEAPOT);
+	glBindBuffer(GL_ARRAY_BUFFER, NBO_TEAPOT);
+	glBufferData(GL_ARRAY_BUFFER, data.vertex_count*3*sizeof(GLfloat), nba_teapot, GL_STATIC_DRAW);
 
 }
 
@@ -824,9 +891,9 @@ void Initialize(void) {
 	memset(nba_teapot, 0.0, data.vertex_count*3*sizeof(GLfloat));
 
 	//calculate normals
-	calculateNormals(iba_cube, vba_cube, nba_cube, sizeof(iba_cube) / sizeof(GLushort));
-	calculateNormals(iba_pyramid, vba_pyramid, nba_pyramid, sizeof(iba_pyramid) / sizeof(GLushort));
-	calculateNormals(iba_teapot, vba_teapot, nba_teapot, indx*3);
+	calculateNormals(iba_cube, vba_cube, nba_cube, sizeof(iba_cube) / sizeof(GLushort), sizeof(vba_cube) / sizeof(GLfloat));
+	calculateNormals(iba_pyramid, vba_pyramid, nba_pyramid, sizeof(iba_pyramid) / sizeof(GLushort), sizeof(vba_pyramid) / sizeof(GLfloat));
+	calculateNormals(iba_teapot, vba_teapot, nba_teapot, indx*3, vert*3);
 
 	/* Set background (clear) color to blue */
 	glClearColor(0.5, 0.6, 1.0, 0.0);
