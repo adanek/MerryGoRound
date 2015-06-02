@@ -36,6 +36,7 @@
 
 // Specific host configuration file
 #include "Host.h"
+#include "vector.h"
 
 #ifdef PATI
 #define GLEW_STATIC
@@ -792,7 +793,10 @@ void Initialize(void) {
 
 	//normals for cube
 	nba_cube = (GLfloat*) malloc(sizeof(vba_cube));
-	memset(nba_cube, 0.0, sizeof(vba_cube));
+	memset(nba_cube, 0.0f, sizeof(vba_cube));
+
+	//calculate normals for cubes
+	calculateNormals(iba_cube, vba_cube, nba_cube, sizeof(iba_cube) / sizeof(GLushort));
 
 	//normals for pyramid
 	nba_pyramid = (GLfloat*) malloc(sizeof(vba_pyramid));
