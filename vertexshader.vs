@@ -3,6 +3,7 @@
 uniform mat4 ProjectionMatrix; 
 uniform mat4 ViewMatrix;
 uniform mat4 ModelMatrix;
+uniform mat3 NormalMatrix;
 
 uniform vec4 FixedColor;
 
