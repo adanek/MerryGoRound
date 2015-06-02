@@ -18,7 +18,7 @@ void main()
 {
    vColor = FixedColor;
 
-   vNormal = normalize(ModelMatrix * VertexNormal);
+   vNormal = normalize(NormalMatrix * VertexNormal);
    gl_Position = ProjectionMatrix*ViewMatrix*ModelMatrix*vec4(Position.x, Position.y, Position.z, 1.0);
  
 }
