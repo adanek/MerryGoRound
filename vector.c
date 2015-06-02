@@ -31,16 +31,16 @@ void addVector3(GLfloat* buf, struct vec3 v){
 	buf[2] += v.z;
 }
 
-void calculateNormals(GLushort* ida, GLfloat* vba, GLfloat* nba, int len){
+void calculateNormals(GLushort* ida, GLfloat* vba, GLfloat* nba, int idxs, int vdxs){
 
-	if (len % 3 != 0){
-		printf("ERROR: Invalid length of index array (%d)\n", len);
+	if (idxs % 3 != 0){
+		printf("ERROR: Invalid length of index array (%d)\n", idxs);
 		return;
 	}
 
-	len /= 3;
+	idxs /= 3;
 
-	for (int t = 0; t < len; t++){
+	for (int t = 0; t < idxs; t++){
 
 		GLushort a = ida[t * 3];
 		GLushort b = ida[t * 3 + 1];
@@ -73,9 +73,10 @@ void calculateNormals(GLushort* ida, GLfloat* vba, GLfloat* nba, int len){
 		printf("Normal of triangle %d: %5.2f %5.2f %5.2f\n", t, n.x, n.y, n.z);
 	}
 
+	normailize(nba, vdxs);
 }
 
-GLfloat norm(GLfloat* vec){
+GLfloat norm3(GLfloat* vec){
 	GLfloat x2 = pow(vec[0], 2);
 	GLfloat y2 = pow(vec[1], 2);
 	GLfloat z2 = pow(vec[2], 2);
@@ -93,11 +94,12 @@ void normailize(GLfloat* nba, int len){
 		GLfloat y = nba[i * 3 + 1];
 		GLfloat z = nba[i * 3 + 2];
 
-		GLfloat n = norm(&nba[i * 3]);
+		GLfloat n = norm3(&nba[i * 3]);
 
 		nba[i * 3 + 0] = x / n;
 		nba[i * 3 + 1] = y / n;
 		nba[i * 3 + 2] = z / n;
-	}
 
+		printf("Normal of triangle %d: %5.2f %5.2f %5.2f\n", i, nba[i * 3 + 0], nba[i * 3 + 1], nba[i * 3 + 2]);
+	}
 }
