@@ -202,7 +202,13 @@ GLfloat cba_pyramid_back[] = { /* RGB color values for vertices */
 
 //Index buffer
 GLushort iba_pyramid[] = { /* Indices of triangles */
-0, 1, 2, 2, 3, 0, 0, 1, 4, 2, 4, 1, 0, 4, 3, 3, 2, 4, };
+//0, 1, 2, 2, 3, 0, 0, 1, 4, 2, 4, 1, 0, 4, 3, 3, 2, 4, };
+1, 0, 2,
+3, 2, 0,
+1, 0, 4,
+4, 2, 1,
+4, 0, 3,
+2, 3, 4, };
 
 //normal buffers:
 GLfloat *nba_cube;
@@ -693,7 +699,7 @@ void SetupDataBuffers() {
 	//normal buffer
 	glGenBuffers(1, &NBO_PYRAMID);
 	glBindBuffer(GL_ARRAY_BUFFER, NBO_PYRAMID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(nba_pyramid) * 3 * sizeof(GLfloat), nba_pyramid,
+	glBufferData(GL_ARRAY_BUFFER, 5 * 3 * sizeof(GLfloat), nba_pyramid,
 	GL_STATIC_DRAW);
 
 	//color buffer (red)
@@ -850,8 +856,8 @@ void setupLighting() {
 	setAmbientLighting(0.2);
 	setShininess(20.0);
 	setStrength(10.0);
-	setLightColor(0.4, 0.2, 0.4);
-	setLightDirection(5,10,5);
+	setLightColor(0.4, 0.4, 0.3);
+	setLightDirection(10,10,10);
 }
 
 /******************************************************************
