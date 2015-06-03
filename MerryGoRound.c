@@ -592,7 +592,7 @@ void OnIdle() {
 	oldTime = newTime;
 
 //BEGIN TO BE DELETED
-	delta = 0.0f;
+	//delta = 0.0f;
 //END TO BE DELETED
 
 	//manual animation

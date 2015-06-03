@@ -18,6 +18,8 @@ out vec4 vPosition;
 void main()
 {
    vColor = FixedColor;
+   
+   
    mat3 X = NormalMatrix * NormalMatrix;
 
    mat3 M = mat3(ModelMatrix);
