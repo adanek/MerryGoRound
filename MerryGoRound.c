@@ -30,6 +30,9 @@
  * Keys:
  * a or A: decrease ambient light by 0.2
  * s or S: increase ambient light by 0.2
+ * v or V: turn on/off ambient light
+ * b or B: turn on/off diffuse light
+ * n or N: turn on/off specular light
  *
  *******************************************************************/
 
@@ -254,6 +257,24 @@ void setAmbientLighting(GLfloat val) {
 	glUniform1f(ambientLoc, val);
 }
 
+void setShowAmbient(GLint val) {
+
+	GLint show_ambientLoc = glGetUniformLocation(ShaderProgram, "SHOW_AMBIENT");
+	glUniform1f(show_ambientLoc, val);
+}
+
+void setShowDiffuse(GLint val) {
+
+	GLint show_diffuseLoc = glGetUniformLocation(ShaderProgram, "SHOW_DIFFUSE");
+	glUniform1f(show_diffuseLoc, val);
+}
+
+void setShowSpecular(GLint val) {
+
+	GLint show_specularLoc = glGetUniformLocation(ShaderProgram, "SHOW_SPECULAR");
+	glUniform1f(show_specularLoc, val);
+}
+
 void setShininess(GLfloat val) {
 
 	GLint ShininessLoc = glGetUniformLocation(ShaderProgram, "Shininess");
@@ -266,25 +287,32 @@ void setStrength(GLfloat val) {
 	glUniform1f(StrengthLoc, val);
 }
 
-void setLightColor(GLfloat r, GLfloat g, GLfloat b) {
+void setLightColor1(GLfloat r, GLfloat g, GLfloat b) {
 
-	GLint LightColorLoc = glGetUniformLocation(ShaderProgram, "LightColor");
+	GLint LightColorLoc = glGetUniformLocation(ShaderProgram, "L1_Color");
 	glUniform3f(LightColorLoc, r, g, b);
 
 }
 
-void setLightDirection(GLfloat x, GLfloat y, GLfloat z) {
+void setLightPosition1(GLfloat x, GLfloat y, GLfloat z) {
 
-	GLint LightDirectionLoc = glGetUniformLocation(ShaderProgram,
-			"LightDirection");
-	glUniform3f(LightDirectionLoc, x, y, z);
+	GLint LightPositionLoc = glGetUniformLocation(ShaderProgram,
+		"L1_Position");
+	glUniform3f(LightPositionLoc, x, y, z);
 
 }
 
-void setLightPosition(GLfloat x, GLfloat y, GLfloat z) {
+void setLightColor2(GLfloat r, GLfloat g, GLfloat b) {
+
+	GLint LightColorLoc = glGetUniformLocation(ShaderProgram, "L2_Color");
+	glUniform3f(LightColorLoc, r, g, b);
+
+}
+
+void setLightPosition2(GLfloat x, GLfloat y, GLfloat z) {
 
 	GLint LightPositionLoc = glGetUniformLocation(ShaderProgram,
-		"LightPosition");
+		"L2_Position");
 	glUniform3f(LightPositionLoc, x, y, z);
 
 }
@@ -302,6 +330,30 @@ GLfloat getAmbientLighting() {
 	GLint ambientLoc = glGetUniformLocation(ShaderProgram, "ambient");
 	GLfloat val;
 	glGetUniformfv(ShaderProgram, ambientLoc, &val);
+	return val;
+}
+
+GLint getShowAmbient() {
+
+	GLint show_ambientLoc = glGetUniformLocation(ShaderProgram, "SHOW_AMBIENT");
+	GLfloat val;
+	glGetUniformfv(ShaderProgram, show_ambientLoc, &val);
+	return val;
+}
+
+GLint getShowDiffuse() {
+
+	GLint show_diffuseLoc = glGetUniformLocation(ShaderProgram, "SHOW_DIFFUSE");
+	GLfloat val;
+	glGetUniformfv(ShaderProgram, show_diffuseLoc, &val);
+	return val;
+}
+
+GLint getShowSpecular() {
+
+	GLint show_specularLoc = glGetUniformLocation(ShaderProgram, "SHOW_SPECULAR");
+	GLfloat val;
+	glGetUniformfv(ShaderProgram, show_specularLoc, &val);
 	return val;
 }
 
@@ -901,9 +953,14 @@ void setupLighting() {
 	setAmbientLighting(0.2);
 	setShininess(50.0);
 	setStrength(5.0);
-	setLightColor(1, 1, 1);
-	setLightDirection(1, 2, 1);
-	setLightPosition(10 , 0, -10 - distance);
+
+	//point light 1
+	setLightColor1(1, 1, 1);
+	setLightPosition1(10 , 0, -10 - distance);
+
+	//point light 2
+	setLightColor2(1, 0.2, 0.2);
+	setLightPosition2(10 , 0, -10 - distance);
 	setAttenuation(0.1, 0.01, 0.01);
 }
 
@@ -1023,6 +1080,9 @@ void Initialize(void) {
 void Keyboard(unsigned char key, int x, int y) {
 
 	GLfloat ambient = 0.0;
+	GLint show_ambient = 0;
+	GLint show_diffuse = 0;
+	GLint show_specular = 0;
 
 	switch (key) {
 
@@ -1085,6 +1145,51 @@ void Keyboard(unsigned char key, int x, int y) {
 			ambient += 0.2;
 			setAmbientLighting(ambient);
 		}
+		break;
+	//turn on/off ambient light
+	case 'v':
+	case 'V':
+		//get current value
+		show_ambient = getShowAmbient();
+		//turn on ambient light
+		if(show_ambient == 0){
+			show_ambient = 1;
+		//turn off ambient light
+		}else{
+			show_ambient = 0;
+		}
+		//set variable in shader
+		setShowAmbient(show_ambient);
+		break;
+	//turn on/off diffuse light
+	case 'b':
+	case 'B':
+		//get current value
+		show_diffuse = getShowDiffuse();
+		//turn on diffuse light
+		if(show_diffuse == 0){
+			show_diffuse = 1;
+		//turn off diffuse light
+		}else{
+			show_diffuse = 0;
+		}
+		//set variable in shader
+		setShowDiffuse(show_diffuse);
+		break;
+	//turn on/off specular light
+	case 'n':
+	case 'N':
+		//get current value
+		show_specular = getShowSpecular();
+		//turn on specular light
+		if(show_specular == 0){
+			show_specular = 1;
+		//turn off specular light
+		}else{
+			show_specular = 0;
+		}
+		//set variable in shader
+		setShowSpecular(show_specular);
 		break;
 	}
 
