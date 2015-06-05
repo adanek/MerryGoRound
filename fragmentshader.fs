@@ -23,6 +23,7 @@ in vec4 vPosition;
 
 out vec4 FragColor;
 
+uniform mat4 ViewMatrix;
 
 void main()
 {   
@@ -34,7 +35,7 @@ void main()
     // Lightsource 1
     vec3 lpos = L1_Position;
     vec3 lcol = L1_Color;
-    
+
     vec3 lightDirection = lpos - vec3(vPosition);
     float lightDistance = length(lightDirection);    
     lightDirection = lightDirection / lightDistance;
@@ -86,16 +87,16 @@ void main()
     vec3 rl2 = lcol * specular * attenuation;
 
 
-    if(ShowAmbient == TRUE){
+    if(ShowAmbient != TRUE){
         ambient = vec3(0);
     }
 
-    if(ShowDiffuse == TRUE){
+    if(ShowDiffuse != TRUE){
         sl1 = vec3(0);
         sl2 = vec3(0);
     }
 
-    if(ShowSpecular == TRUE){
+    if(ShowSpecular != TRUE){
         rl1 = vec3(0);
         rl2 = vec3(0);
     }

@@ -73,7 +73,7 @@ GLboolean anim = GL_FALSE;
 GLboolean auto_anim = GL_TRUE;
 
 //initialization camera distance
-float distance = -30.0;
+float distance = -20.0;
 
 //initialization of zoom direction with -1 -> zomm in
 int dir = 1;
@@ -407,7 +407,7 @@ void setAttenuation(GLfloat constant, GLfloat linear, GLfloat quadratic) {
 
 GLfloat getAmbientLighting() {
 
-	GLint ambientLoc = glGetUniformLocation(ShaderProgram, "ambient");
+	GLint ambientLoc = glGetUniformLocation(ShaderProgram, "Ambient");
 	GLfloat val;
 	glGetUniformfv(ShaderProgram, ambientLoc, &val);
 	return val;
@@ -623,15 +623,15 @@ void Display() {
 	//pyramid 5 - static
 
 	//color buffer
-	//glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID6);
-	//glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID6);
+	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	//SetScaling(3.0, 3.0, 3.0, scaling);
-	//SetTranslation(10.0, 5.0, -10.0, transform);
-	//MultiplyMatrix(transform, scaling, ModelMatrixPyramid5);
-	//MultiplyMatrix(transform, ModelMatrixPyramid5, transform);
-	//glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixPyramid5);
-	//glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+	SetScaling(3.0, 3.0, 3.0, scaling);
+	SetTranslation(10.0, 5.0, -10.0, transform);
+	MultiplyMatrix(transform, scaling, ModelMatrixPyramid5);
+	MultiplyMatrix(transform, ModelMatrixPyramid5, transform);
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixPyramid5);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
 
 	//switch buffers
 
@@ -1029,7 +1029,7 @@ void setupLighting() {
 	setShowAmbient(1);
 	setShowDiffuse(1);
 	setShowSpecular(1);
-	setShininess(50.0);
+	setShininess(150.0);
 	setStrength(5.0);
 
 	//point light 1
@@ -1219,10 +1219,10 @@ void Keyboard(unsigned char key, int x, int y) {
 		//increase ambient light
 	case 's':
 	case 'S':
-		ambient = getAmbientLighting();
+		ambient = getAmbientLighting();		
 		if (ambient < 1.0) {
 			ambient += 0.2;
-			setAmbientLighting(ambient);
+			setAmbientLighting(ambient);			
 		}
 		break;
 	//turn on/off ambient light
@@ -1232,12 +1232,10 @@ void Keyboard(unsigned char key, int x, int y) {
 		show_ambient = getShowAmbient();
 		//turn on ambient light
 		if(show_ambient == 0){
-			show_ambient = 1;
-			puts("Ambient light on");
+			show_ambient = 1;			
 		//turn off ambient light
 		}else{
-			show_ambient = 0;
-			puts("Ambient light off");
+			show_ambient = 0;			
 		}
 		//set variable in shader
 		setShowAmbient(show_ambient);
