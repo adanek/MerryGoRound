@@ -145,8 +145,6 @@ float ModelMatrixPyramidTop[16];
 float ModelMatrixTop[16];
 float ModelMatrixFloor[16];
 
-float NormalMatrix[9];
-
 // Enables the animation of the camera
 int animateCamera = 1;
 
@@ -154,18 +152,72 @@ int animateCamera = 1;
 //Buffers for cuboid:
 //Vertex buffer array
 GLfloat vba_cube[] = {
-	-4.0, -0.25, -4.0, 
-	-4.0, -0.25,  4.0, 
-	-4.0,  0.25,  4.0, 
-	-4.0,  0.25, -4.0, 
-	 4.0, -0.25,  4.0, 
-	 4.0, -0.25, -4.0, 
-	 4.0,  0.25, -4.0, 
-	 4.0,  0.25,  4.0 
+
+	// bottom
+	-4.0, -0.25, -4.0, // 0 0
+	-4.0, -0.25,  4.0, // 1 1
+	 4.0, -0.25,  4.0, // 4 2
+	 4.0, -0.25, -4.0, // 5 3
+
+	// top
+	 -4.0, 0.25,  4.0, // 2 4  
+	 -4.0, 0.25, -4.0, // 3 5 
+	  4.0, 0.25, -4.0, // 6 6
+	  4.0, 0.25,  4.0, // 7 7
+
+	// Front
+	-4.0, -0.25, 4.0, // 1 8
+	-4.0,  0.25, 4.0, // 2 9 
+	 4.0, -0.25, 4.0, // 4 10
+	 4.0,  0.25, 4.0, // 7 11
+
+	// Back
+	-4.0, -0.25, -4.0, // 0 12
+	-4.0,  0.25, -4.0, // 3 13
+	 4.0, -0.25, -4.0, // 5 14
+	 4.0,  0.25, -4.0, // 6 15
+
+	// Left
+	 -4.0, -0.25, -4.0, // 0 16
+	 -4.0, -0.25,  4.0, // 1 17
+	 -4.0,  0.25,  4.0, // 2 18
+	 -4.0,  0.25, -4.0, // 3 19
+	 
+	// Right
+	  4.0, -0.25,  4.0, // 4 20
+	  4.0, -0.25, -4.0, // 5 21
+	  4.0,  0.25, -4.0, // 6 22
+	  4.0,  0.25,  4.0  // 7 23
 };
 
 //Index buffer array
 GLushort iba_cube[] = {
+
+	// Bottom
+	0, 2, 1,
+	0, 3, 2,
+
+	// Top
+	4, 7, 5,
+	5, 7, 6,
+
+	// Front
+	8, 10, 9,
+	9, 10, 11,
+
+	// Back
+	12, 13, 14,
+	13, 15, 14,
+
+	// Left
+	16, 17, 18,
+	16, 18, 19,
+
+	// Right
+	20, 21, 22,
+	20, 22, 23
+
+	/*
 	0, 1, 2,
 	2, 3, 0, 
 	1, 4, 7, 
@@ -177,7 +229,7 @@ GLushort iba_cube[] = {
 	2, 7, 6, 
 	6, 3, 2, 
 	6, 0, 3, 
-	0, 6, 5 
+	0, 6, 5 */ 
 };
 
 //Color buffer array
@@ -202,17 +254,41 @@ GLfloat vba_pyramid[] = {
 	 1.0, -2.0, -1.0,
 	 1.0, -2.0,  1.0,
 	-1.0, -2.0,  1.0,
+
+	 1.0, -2.0, -1.0,
+	-1.0, -2.0, -1.0,
 	 0.0,  0.0,  0.0, 
+
+	 1.0, -2.0, 1.0,
+	 0.0, 0.0, 0.0,
+	 -1.0, -2.0, 1.0,
+
+	 -1.0, -2.0, -1.0,
+	 -1.0, -2.0, 1.0,
+	 0.0, 0.0, 0.0,
+
+	 0.0, 0.0, 0.0,
+	 1.0, -2.0, 1.0,
+	 1.0, -2.0, -1.0,
 };
 
 //Index buffer
 GLushort iba_pyramid[] = { 
-	1, 2, 0,
+	// bottom
+	1, 2, 0, 
 	3, 0, 2,
-	1, 0, 4,
-	4, 2, 1,
-	4, 0, 3,
-	2, 4, 3 
+
+	// back face
+	4, 5, 6, 
+
+	// front face
+	7, 8, 9,
+
+	//left face
+	10, 11, 12,
+
+	// right face
+	13, 14, 15
 };
 
 //Color buffer - red pyramid
@@ -257,26 +333,26 @@ GLfloat *nba_teapot;
  *******************************************************************/
 void setAmbientLighting(GLfloat val) {
 
-	GLint ambientLoc = glGetUniformLocation(ShaderProgram, "ambient");
+	GLint ambientLoc = glGetUniformLocation(ShaderProgram, "Ambient");
 	glUniform1f(ambientLoc, val);
 }
 
 void setShowAmbient(GLint val) {
 
-	GLint show_ambientLoc = glGetUniformLocation(ShaderProgram, "SHOW_AMBIENT");
-	glUniform1f(show_ambientLoc, val);
+	GLint show_ambientLoc = glGetUniformLocation(ShaderProgram, "ShowAmbient");
+	glUniform1i(show_ambientLoc, val);
 }
 
 void setShowDiffuse(GLint val) {
 
-	GLint show_diffuseLoc = glGetUniformLocation(ShaderProgram, "SHOW_DIFFUSE");
-	glUniform1f(show_diffuseLoc, val);
+	GLint show_diffuseLoc = glGetUniformLocation(ShaderProgram, "ShowDiffuse");
+	glUniform1i(show_diffuseLoc, val);
 }
 
 void setShowSpecular(GLint val) {
 
-	GLint show_specularLoc = glGetUniformLocation(ShaderProgram, "SHOW_SPECULAR");
-	glUniform1f(show_specularLoc, val);
+	GLint show_specularLoc = glGetUniformLocation(ShaderProgram, "ShowSpecular");
+	glUniform1i(show_specularLoc, val);
 }
 
 void setShininess(GLfloat val) {
@@ -339,25 +415,25 @@ GLfloat getAmbientLighting() {
 
 GLint getShowAmbient() {
 
-	GLint show_ambientLoc = glGetUniformLocation(ShaderProgram, "SHOW_AMBIENT");
-	GLfloat val;
-	glGetUniformfv(ShaderProgram, show_ambientLoc, &val);
+	GLint show_ambientLoc = glGetUniformLocation(ShaderProgram, "ShowAmbient");
+	GLint val;
+	glGetUniformiv(ShaderProgram, show_ambientLoc, &val);
 	return val;
 }
 
 GLint getShowDiffuse() {
 
-	GLint show_diffuseLoc = glGetUniformLocation(ShaderProgram, "SHOW_DIFFUSE");
-	GLfloat val;
-	glGetUniformfv(ShaderProgram, show_diffuseLoc, &val);
+	GLint show_diffuseLoc = glGetUniformLocation(ShaderProgram, "ShowDiffuse");
+	GLint val;
+	glGetUniformiv(ShaderProgram, show_diffuseLoc, &val);
 	return val;
 }
 
 GLint getShowSpecular() {
 
-	GLint show_specularLoc = glGetUniformLocation(ShaderProgram, "SHOW_SPECULAR");
-	GLfloat val;
-	glGetUniformfv(ShaderProgram, show_specularLoc, &val);
+	GLint show_specularLoc = glGetUniformLocation(ShaderProgram, "ShowSpecular");
+	GLint val;
+	glGetUniformiv(ShaderProgram, show_specularLoc, &val);
 	return val;
 }
 
@@ -425,13 +501,6 @@ void Display() {
 		fprintf(stderr, "Could not bind uniform ModelMatrix\n");
 		exit(-1);
 	}
-
-	GLint NormalUniform = glGetUniformLocation(ShaderProgram, "NormalMatrix");
-	if (NormalUniform == -1) {
-		fprintf(stderr, "Could not bind uniform NormalMatrix\n");
-		exit(-1);
-	}
-	glUniformMatrix3fv(ViewUniform, 1, GL_TRUE, NormalMatrix);
 
 	//Screen elements:
 
@@ -953,19 +1022,24 @@ void CreateShaderProgram() {
 }
 
 void setupLighting() {
+
+
 	/* Set lighing defaults*/
 	setAmbientLighting(0.2);
+	setShowAmbient(1);
+	setShowDiffuse(1);
+	setShowSpecular(1);
 	setShininess(50.0);
 	setStrength(5.0);
 
 	//point light 1
 	setLightColor1(1, 1, 1);
-	setLightPosition1(10 , 0, -10 - distance);
+	setLightPosition1(10 , 7, -distance);
 
 	//point light 2
 	setLightColor2(1, 0.2, 0.2);
-	setLightPosition2(-5 , 10, -distance/2);
-	setAttenuation(0.1, 0.01, 0.01);
+	setLightPosition2(-10, 2, -distance);
+	setAttenuation(0.2, 0.01, 0.01);
 }
 
 /******************************************************************
@@ -1031,9 +1105,11 @@ void Initialize(void) {
 	calculateNormals(iba_cube, vba_cube, nba_cube,
 			sizeof(iba_cube) / sizeof(GLushort),
 			sizeof(vba_cube) / sizeof(GLfloat));
+
 	calculateNormals(iba_pyramid, vba_pyramid, nba_pyramid,
 			sizeof(iba_pyramid) / sizeof(GLushort),
 			sizeof(vba_pyramid) / sizeof(GLfloat));
+
 	calculateNormals(iba_teapot, vba_teapot, nba_teapot, indx * 3, vert * 3);
 
 	/* Set background (clear) color to blue */
@@ -1053,8 +1129,7 @@ void Initialize(void) {
 	SetIdentityMatrix(ProjectionMatrix);
 	SetIdentityMatrix(ViewMatrix);
 	SetIdentityMatrix(ModelMatrix);
-	SetIdentityMatrix3x3(NormalMatrix);
-
+	
 	/* Initialize animation matrices */
 	SetIdentityMatrix(RotationMatrixAnimX);
 	SetIdentityMatrix(RotationMatrixAnimY);
@@ -1158,9 +1233,11 @@ void Keyboard(unsigned char key, int x, int y) {
 		//turn on ambient light
 		if(show_ambient == 0){
 			show_ambient = 1;
+			puts("Ambient light on");
 		//turn off ambient light
 		}else{
 			show_ambient = 0;
+			puts("Ambient light off");
 		}
 		//set variable in shader
 		setShowAmbient(show_ambient);
