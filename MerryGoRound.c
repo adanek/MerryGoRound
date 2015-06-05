@@ -960,7 +960,7 @@ void setupLighting() {
 
 	//point light 2
 	setLightColor2(1, 0.2, 0.2);
-	setLightPosition2(10 , 0, -10 - distance);
+	setLightPosition2(-5 , 10, -distance/2);
 	setAttenuation(0.1, 0.01, 0.01);
 }
 
