@@ -1,6 +1,6 @@
 CC = gcc
-OBJ = MerryGoRound.o LoadShader.o Matrix.o OBJParser.o List.o StringExtra.o
-CFLAGS = -g -Wall -Wextra
+OBJ = vector.o MerryGoRound.o LoadShader.o Matrix.o OBJParser.o List.o StringExtra.o
+CFLAGS = -g -Wall -Wextra -std=c99
 
 LDLIBS=-lm -lglut -lGLEW -lGL
 
