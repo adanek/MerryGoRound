@@ -1,23 +1,33 @@
 #version 330
 
-in vec4 vColor;
-in vec3 vNormal;
-in vec4 vPosition;
 uniform vec3 LightColor;
 uniform vec3 LightDirection;
-uniform vec3 HalfVector;
+uniform vec3 LightPosition;
+uniform vec3 EyeDirection;
 uniform float Shininess;
 uniform float Strength;
 uniform float ambient;
+
+in vec4 vColor;
+in vec3 vNormal;
+in vec4 vPosition;
 
 out vec4 FragColor;
 
 void main()
 {
+    
+    vec3 lightDirection = LightPosition - vec3(vPosition);
+    float lightDistance = length(lightDirection);
 
-	vec3 h = normalize(LightDirection - vec3(vPosition));
+    // Normalize lightdirection
+    lightDirection = lightDirection / lightDistance;
 
-	float diffuse = max(0.0, dot(vNormal, LightDirection));
+    vec3 l = normalize(LightDirection);
+	vec3 v = normalize(EyeDirection);
+    vec3 h = normalize(lightDirection + v);
+
+	float diffuse = max(0.0, dot(vNormal, l));    
 	float specular = max(0.0, dot(vNormal, h));
 	
 	if(diffuse == 0.0)

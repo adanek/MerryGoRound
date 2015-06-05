@@ -17,12 +17,11 @@ out vec4 vPosition;
 
 void main()
 {
-   vColor = FixedColor;
-   
+   vColor = FixedColor;   
    
    mat3 X = NormalMatrix * NormalMatrix;
 
-   mat3 M = mat3(ModelMatrix);
+   mat3 M = mat3(ViewMatrix*ModelMatrix);
    mat3 G = transpose(inverse(M));
    vec3 n = G * VertexNormal;
    n = normalize(n);
@@ -31,6 +30,5 @@ void main()
 
    //vNormal = normalize(NormalMatrix * VertexNormal);
    gl_Position = ProjectionMatrix*ViewMatrix*ModelMatrix*vec4(Position.x, Position.y, Position.z, 1.0);
-   vPosition = gl_Position;
- 
+   vPosition = gl_Position; 
 }

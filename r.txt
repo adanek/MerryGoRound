@@ -1,0 +1,408 @@
+glEnableVertexAttribArray(vPosition);
+glBindBuffer(GL_ARRAY_BUFFER, VBO_CUBE);
+glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+glEnableVertexAttribArray(vColor);
+glBindBuffer(GL_ARRAY_BUFFER, CBO_CUBE);
+glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+setColor(cba_purple);
+
+glEnableVertexAttribArray(vNormal);
+glBindBuffer(GL_ARRAY_BUFFER, NBO_CUBE);
+glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_CUBE);
+GLint size;
+glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+
+/* Associate program with shader matrices */
+GLint projectionUniform = glGetUniformLocation(ShaderProgram,
+	"ProjectionMatrix");
+if (projectionUniform == -1) {
+	fprintf(stderr, "Could not bind uniform ProjectionMatrix\n");
+	exit(-1);
+}
+glUniformMatrix4fv(projectionUniform, 1, GL_TRUE, ProjectionMatrix);
+
+GLint ViewUniform = glGetUniformLocation(ShaderProgram, "ViewMatrix");
+if (ViewUniform == -1) {
+	fprintf(stderr, "Could not bind uniform ViewMatrix\n");
+	exit(-1);
+}
+glUniformMatrix4fv(ViewUniform, 1, GL_TRUE, ViewMatrix);
+
+GLint RotationUniform = glGetUniformLocation(ShaderProgram, "ModelMatrix");
+if (RotationUniform == -1) {
+	fprintf(stderr, "Could not bind uniform ModelMatrix\n");
+	exit(-1);
+}
+
+GLint NormalUniform = glGetUniformLocation(ShaderProgram, "NormalMatrix");
+if (NormalUniform == -1) {
+	fprintf(stderr, "Could not bind uniform NormalMatrix\n");
+	exit(-1);
+}
+glUniformMatrix3fv(ViewUniform, 1, GL_TRUE, NormalMatrix);
+
+//Screen elements:
+
+//lower platform
+glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, Rotation);
+glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+//upper platform
+float scaling[16];
+SetScaling(1.0, 1.0, 1.0, scaling);
+MultiplyMatrix(ModelMatrixTop, scaling, ModelMatrix);
+glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixTop);
+glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+//connectors
+float transform[16];
+
+//connector 1
+SetScaling(0.05, 8.0, 0.05, scaling);
+SetTranslation(1.7, 1.1, 1.7, transform);
+MultiplyMatrix(transform, scaling, ModelMatrix);
+MultiplyMatrix(transform, ModelMatrix, transform);
+MultiplyMatrix(Rotation, transform, ModelMatrix);
+glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
+glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+//connector 2
+SetTranslation(-1.7, 1.1, -1.7, transform);
+MultiplyMatrix(transform, scaling, ModelMatrix);
+MultiplyMatrix(transform, ModelMatrix, transform);
+MultiplyMatrix(Rotation, transform, ModelMatrix);
+glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
+glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+//connector 3
+SetTranslation(-1.7, 1.1, 1.7, transform);
+MultiplyMatrix(transform, scaling, ModelMatrix);
+MultiplyMatrix(transform, ModelMatrix, transform);
+MultiplyMatrix(Rotation, transform, ModelMatrix);
+glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
+glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+//connector 4
+SetTranslation(1.7, 1.1, -1.7, transform);
+MultiplyMatrix(transform, scaling, ModelMatrix);
+MultiplyMatrix(transform, ModelMatrix, transform);
+MultiplyMatrix(Rotation, transform, ModelMatrix);
+glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
+glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+//switch to pyramid buffers
+glBindBuffer(GL_ARRAY_BUFFER, VBO_PYRAMID);
+glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+glBindBuffer(GL_ARRAY_BUFFER, NBO_PYRAMID);
+glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_PYRAMID);
+glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+
+//top pyramid
+SetScaling(4.0, 1.0, 4.0, scaling);
+MultiplyMatrix(ModelMatrixPyramidTop, scaling, ModelMatrix);
+glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
+glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+//switch color buffer
+glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID);
+glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+setColor(cba_red);
+
+//transformation
+SetScaling(1.0, 1.0, 1.0, scaling);
+SetRotationZ(0.0, transform);
+MultiplyMatrix(transform, scaling, ModelMatrix);
+SetTranslation(0.0, 1.0, 0.0, transform);
+MultiplyMatrix(transform, ModelMatrix, transform);
+
+//inner elements:
+
+//pyramid 1
+MultiplyMatrix(ModelMatrixPyramid, transform, ModelMatrix);
+MultiplyMatrix(Rotation, ModelMatrix, ModelMatrix);
+glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
+glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+//switch color buffer
+glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID2);
+glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+setColor(cba_green);
+
+//pyramid 2
+MultiplyMatrix(ModelMatrixPyramid2, transform, ModelMatrix);
+MultiplyMatrix(Rotation, ModelMatrix, ModelMatrix);
+glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
+glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+//switch color buffer
+glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID3);
+glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+setColor(cba_blue);
+
+//pyramid 3
+MultiplyMatrix(ModelMatrixPyramid3, transform, ModelMatrix);
+MultiplyMatrix(Rotation, ModelMatrix, ModelMatrix);
+glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
+glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+//switch color buffer
+glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID4);
+glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+setColor(cba_black);
+
+//pyramid 4
+MultiplyMatrix(ModelMatrixPyramid4, transform, ModelMatrix);
+MultiplyMatrix(Rotation, ModelMatrix, ModelMatrix);
+glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
+glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+	//begin floor
+	//pyramid 5 - static
+
+	//color buffer
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID6);
+	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	SetScaling(3.0, 3.0, 3.0, scaling);
+	SetTranslation(10.0, 5.0, -10.0, transform);
+	MultiplyMatrix(transform, scaling, ModelMatrixPyramid5);
+	MultiplyMatrix(transform, ModelMatrixPyramid5, transform);
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixPyramid5);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+	//switch buffers
+
+	//vertex buffer
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_CUBE);
+	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, NBO_CUBE);
+	glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	//index buffer
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_CUBE);
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+
+	//color buffer
+	glBindBuffer(GL_ARRAY_BUFFER, NBO_PYRAMID);
+	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	setColor(cba_floors);
+
+	//color buffer
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID5);
+	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	setColor(cba_floors);
+
+	//floor
+	SetScaling(50.0, 1.0, 50.0, scaling);
+	SetTranslation(0.0, -1.0, 0.0, transform);
+	MultiplyMatrix(transform, scaling, ModelMatrixFloor);
+	MultiplyMatrix(transform, ModelMatrixFloor, transform);
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixFloor);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+	//end floor
+
+
+	
+	//color buffer
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID6);
+	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	SetScaling(3.0, 3.0, 3.0, scaling);
+	SetTranslation(10.0, 5.0, -10.0, transform);
+	MultiplyMatrix(transform, scaling, ModelMatrixPyramid5);
+	MultiplyMatrix(transform, ModelMatrixPyramid5, transform);
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixPyramid5);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+	//switch buffers
+
+
+
+	//begin teapot
+
+	//switch to teapod buffers
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_PYRAMID);
+	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID);
+	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	setColor(cba_red);
+
+	glBindBuffer(GL_ARRAY_BUFFER, NBO_PYRAMID);
+	glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_PYRAMID);
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+
+
+	SetScaling(1.0, 1.0, 1.0, scaling);
+	//SetTranslation(10.0, 5.0, -10.0, transform);
+	MultiplyMatrix(transform, scaling, ModelMatrixPyramidTeapot);
+	MultiplyMatrix(transform, ModelMatrixPyramidTeapot, transform);
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixPyramidTeapot);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+	//end teapot
+
+		//begin floor
+	
+
+
+	//vertex buffer
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_CUBE);
+	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_CUBE);
+	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	setColor(cba_floors);
+
+	glBindBuffer(GL_ARRAY_BUFFER, NBO_CUBE);
+	glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	//index buffer
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_CUBE);
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+
+	//floor
+	//SetScaling(0.5, 0.5, 0.5, scaling);
+	//SetTranslation(-4, -4, -4, transform);
+	MultiplyMatrix(transform, scaling, ModelMatrixFloor);
+	MultiplyMatrix(transform, ModelMatrixFloor, transform);
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixFloor);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+	//end floor
+
+
+
+
+
+
+
+
+
+
+
+
+		/* Clear window; color specified in 'Initialize()' */
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	glEnableVertexAttribArray(vPosition);
+	glEnableVertexAttribArray(vColor);
+	glEnableVertexAttribArray(vNormal);
+
+	float scaling[16];
+	float transform[16];
+	GLint size = 0;
+
+	SetIdentityMatrix(scaling);
+	SetIdentityMatrix(transform);
+
+	/* Associate program with shader matrices */
+	GLint projectionUniform = glGetUniformLocation(ShaderProgram,
+		"ProjectionMatrix");
+	if (projectionUniform == -1) {
+		fprintf(stderr, "Could not bind uniform ProjectionMatrix\n");
+		exit(-1);
+	}
+	glUniformMatrix4fv(projectionUniform, 1, GL_TRUE, ProjectionMatrix);
+
+	GLint ViewUniform = glGetUniformLocation(ShaderProgram, "ViewMatrix");
+	if (ViewUniform == -1) {
+		fprintf(stderr, "Could not bind uniform ViewMatrix\n");
+		exit(-1);
+	}
+	glUniformMatrix4fv(ViewUniform, 1, GL_TRUE, ViewMatrix);
+
+	GLint RotationUniform = glGetUniformLocation(ShaderProgram, "ModelMatrix");
+	if (RotationUniform == -1) {
+		fprintf(stderr, "Could not bind uniform ModelMatrix\n");
+		exit(-1);
+	}
+
+	GLint NormalUniform = glGetUniformLocation(ShaderProgram, "NormalMatrix");
+	if (NormalUniform == -1) {
+		fprintf(stderr, "Could not bind uniform NormalMatrix\n");
+		exit(-1);
+	}
+	glUniformMatrix3fv(ViewUniform, 1, GL_TRUE, NormalMatrix);
+
+
+	//begin floor
+	
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_CUBE);
+	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_CUBE);
+	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	setColor(cba_floors);
+
+	glBindBuffer(GL_ARRAY_BUFFER, NBO_CUBE);
+	glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_CUBE);
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+
+	//floor
+	SetScaling(50, 1, 50, scaling);
+	SetTranslation(0, -0.5, 0, transform);
+	MultiplyMatrix(transform, scaling, ModelMatrixFloor);
+	MultiplyMatrix(transform, ModelMatrixFloor, transform);
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixFloor);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+	//end floor
+
+	setColor(cba_purple);
+
+	//lower platform
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, Rotation);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+	//upper platform	
+	SetScaling(1.0, 1.0, 1.0, scaling);
+	SetTranslation(0, 2, 0, tran)
+	MultiplyMatrix(ModelMatrixTop, scaling, ModelMatrix);
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixTop);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+	//connector 1
+	SetScaling(0.05, 8.0, 0.05, scaling);
+	SetTranslation(1.7, 1.1, 1.7, transform);
+	MultiplyMatrix(transform, scaling, ModelMatrix);
+	MultiplyMatrix(transform, ModelMatrix, transform);
+	MultiplyMatrix(Rotation, transform, ModelMatrix);
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+	//connector 2
+	SetTranslation(-1.7, 1.1, -1.7, transform);
+	MultiplyMatrix(transform, scaling, ModelMatrix);
+	MultiplyMatrix(transform, ModelMatrix, transform);
+	MultiplyMatrix(Rotation, transform, ModelMatrix);
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+	//connector 3
+	SetTranslation(-1.7, 1.1, 1.7, transform);
+	MultiplyMatrix(transform, scaling, ModelMatrix);
+	MultiplyMatrix(transform, ModelMatrix, transform);
+	MultiplyMatrix(Rotation, transform, ModelMatrix);
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+	//connector 4
+	SetTranslation(1.7, 1.1, -1.7, transform);
+	MultiplyMatrix(transform, scaling, ModelMatrix);
+	MultiplyMatrix(transform, ModelMatrix, transform);
+	MultiplyMatrix(Rotation, transform, ModelMatrix);
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);

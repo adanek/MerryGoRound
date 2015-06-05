@@ -26,6 +26,19 @@
 #include "Matrix.h"
 #include "OBJParser.h"     /* Loading function for triangle meshes in OBJ format */
 
+
+struct vec3 {
+	GLfloat x;
+	GLfloat y;
+	GLfloat z;
+};
+
+struct vec3 vec3(GLfloat* v);
+GLfloat dot3(struct vec3 v1, struct vec3 v2);
+GLfloat len3(struct vec3 v);
+struct vec3 normalize3(struct vec3 v);
+struct vec3 add(struct vec3 v1, struct vec3 v2);
+
 GLfloat det3x3(GLfloat* x, GLfloat* y, GLfloat* z);
 void calculateNormals(GLushort* ida, GLfloat* vba, GLfloat* nba, int ndxs, int vdxs);
 GLfloat norm3(GLfloat* vec);

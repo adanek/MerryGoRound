@@ -1,10 +1,46 @@
 #include "vector.h"
 
-struct vec3 {
-	GLfloat x;
-	GLfloat y;
-	GLfloat z;
-};
+
+struct vec3 vec3(GLfloat* v){
+	struct vec3 result;
+	result.x = v[0];
+	result.y = v[1];
+	result.z = v[2];
+
+	return result;
+}
+
+
+struct vec3 add(struct vec3 v1, struct vec3 v2){
+	struct vec3 res;
+	res.x = v1.x + v2.x;
+	res.y = v1.y + v2.y;
+	res.z = v1.z + v2.z;
+
+	return res;
+}
+
+GLfloat dot3(struct vec3 v1, struct vec3 v2){
+	GLfloat res = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+	return res;
+}
+
+
+GLfloat len3(struct vec3 v){
+	GLfloat res = sqrtf(pow(v.x, 2) + pow(v.y, 2) + pow(v.z, 2));
+	return res;
+}
+
+struct vec3 normalize3(struct vec3 v){
+	struct vec3 res;
+	GLfloat len = len3(v);
+
+	res.x = v.x / len;
+	res.y = v.y / len;
+	res.z = v.z / len;
+
+	return res;
+}
 
 GLfloat det3x3(GLfloat* x, GLfloat* y, GLfloat* z){
 	return x[0] * y[1] * z[2] + x[1] * y[2] * z[0] + x[2] * y[0] * z[1]
@@ -54,10 +90,10 @@ void calculateNormals(GLushort* ida, GLfloat* vba, GLfloat* nba, int idxs, int v
 		// triangeles must have the same orientation
 		if (det3x3(A, B, C) > 0){
 
-			//puts("Switching orientation");
-			GLfloat* tmp = B;
-			B = C;
-			C = tmp;
+			printf("Wrong orientation: triangle %d: %d %d %d\n", t, a, b, c);
+			//GLfloat* tmp = B;
+			//B = C;
+			//C = tmp;
 		}
 		*/
 
@@ -72,7 +108,7 @@ void calculateNormals(GLushort* ida, GLfloat* vba, GLfloat* nba, int idxs, int v
 		addVector3(&nba[b * 3], n);
 		addVector3(&nba[c * 3], n);
 
-		//printf("Normal of triangle %d: %5.2f %5.2f %5.2f\n", t, n.x, n.y, n.z);
+		printf("Normal of triangle %d: %5.2f %5.2f %5.2f\n", t, n.x, n.y, n.z);
 	}
 
 	normailize(nba, vdxs);
@@ -98,10 +134,12 @@ void normailize(GLfloat* nba, int len){
 
 		GLfloat n = norm3(&nba[i * 3]);
 
+		//printf("Normal of vertex %d: %5.2f %5.2f %5.2f\n", i, nba[i * 3 + 0], nba[i * 3 + 1], nba[i * 3 + 2]);
+
 		nba[i * 3 + 0] = x / n;
 		nba[i * 3 + 1] = y / n;
 		nba[i * 3 + 2] = z / n;
 
-		//printf("Normal of triangle %d: %5.2f %5.2f %5.2f\n", i, nba[i * 3 + 0], nba[i * 3 + 1], nba[i * 3 + 2]);
+		printf("Normal of vertex %d: %5.2f %5.2f %5.2f\n", i, nba[i * 3 + 0], nba[i * 3 + 1], nba[i * 3 + 2]);
 	}
 }
