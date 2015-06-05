@@ -66,7 +66,7 @@ GLboolean anim = GL_FALSE;
 GLboolean auto_anim = GL_TRUE;
 
 //initialization camera distance
-float distance = -20.0;
+float distance = -30.0;
 
 //initialization of zoom direction with -1 -> zomm in
 int dir = 1;
@@ -289,6 +289,14 @@ void setLightPosition(GLfloat x, GLfloat y, GLfloat z) {
 
 }
 
+void setAttenuation(GLfloat constant, GLfloat linear, GLfloat quadratic) {
+
+	GLint AttenuationLoc = glGetUniformLocation(ShaderProgram,
+		"Attenuation");
+	glUniform3f(AttenuationLoc, constant, linear, quadratic);
+
+}
+
 GLfloat getAmbientLighting() {
 
 	GLint ambientLoc = glGetUniformLocation(ShaderProgram, "ambient");
@@ -474,29 +482,13 @@ void Display() {
 	MultiplyMatrix(ModelMatrixPyramid3, transform, ModelMatrix);
 	MultiplyMatrix(Rotation, ModelMatrix, ModelMatrix);
 	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
-	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
-
-	//switch color buffer
-	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID4);
-	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	setColor(cba_black);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_TEAPOT);
-	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, NBO_TEAPOT);
-	glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_TEAPOT);
-	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);	
 
 	//switch color buffer
 	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID4);
 	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	//pyramid 4
-	SetScaling(0.25, 0.25, 0.25, scaling);
-	MultiplyMatrix(scaling, ModelMatrixPyramid4, ModelMatrixPyramid4);
 	MultiplyMatrix(ModelMatrixPyramid4, transform, ModelMatrix);
 	MultiplyMatrix(Rotation, ModelMatrix, ModelMatrix);
 	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
@@ -909,9 +901,10 @@ void setupLighting() {
 	setAmbientLighting(0.2);
 	setShininess(50.0);
 	setStrength(5.0);
-	setLightColor(1.0, 0, 0);
+	setLightColor(1, 1, 1);
 	setLightDirection(1, 2, 1);
-	setLightPosition(-5, 5, 5);
+	setLightPosition(10 , 0, -10 - distance);
+	setAttenuation(0.1, 0.01, 0.01);
 }
 
 /******************************************************************
@@ -919,9 +912,12 @@ void setupLighting() {
  * Initialize
  *
  * This function is called to initialize rendering elements, setup
- * vertex buffer objects, and to setup the vertex and fragment shader
+ * vertex buffer objects, and to setup the vertex and fragment s0ader
  *
  *******************************************************************/
+
+
+
 
 void Initialize(void) {
 
