@@ -34,6 +34,10 @@
  * b or B: turn on/off diffuse light
  * n or N: turn on/off specular light
  *
+ * 2 point lights added
+ *
+ * Phong shading and Phong lighting/reflection implemented (see fragmentshader.fs)
+ *
  *******************************************************************/
 
 // Specific host configuration file
