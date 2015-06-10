@@ -24,10 +24,26 @@ in vec4 vPosition;
 out vec4 FragColor;
 
 uniform mat4 ViewMatrix;
+uniform int UseTexture;
+
+in vec2 UVcoords;
+
+uniform sampler2D myTextureSampler;
 
 void main()
-{   
-    int TRUE = 1;
+{
+
+	int TRUE = 1;
+	vec4 color;
+	
+	//color buffer
+	if(UseTexture != TRUE){
+		color = vColor;
+	//texture
+	}else{
+		color = texture2D(myTextureSampler, UVcoords);
+	}
+
     vec3 ambient = vec3(Ambient);
     vec3 v = normalize(EyeDirection);
     vec3 n  =normalize(vNormal);
@@ -101,6 +117,6 @@ void main()
         rl2 = vec3(0);
     }
 
-    vec3 rgb = min(vColor.rgb * (ambient + sl1 + sl2) + rl1 + rl2, vec3(1.0));
-    FragColor = vec4(rgb, vColor.a);
+    vec3 rgb = min(color.rgb * (ambient + sl1 + sl2) + rl1 + rl2, vec3(1.0));
+    FragColor = vec4(rgb, color.a);
 }

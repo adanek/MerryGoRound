@@ -37,6 +37,13 @@
  * 2 point lights added
  *
  * Phong shading and Phong lighting/reflection implemented (see fragmentshader.fs)
+ * The first result was according to our simple mesh not as expected.
+ * a directly lit face was not complete bright (because of the interpolated normals)
+ * thats why we used vertex doubling do receive a constand normal for each face.
+ *
+ * Changes in Assignmet 4:
+ * Texturing:
+ *
  *
  *******************************************************************/
 
@@ -65,6 +72,7 @@
 
 /* Local includes */
 #include "LoadShader.h"
+#include "LoadTexture.h"
 #include "Matrix.h"
 #include "OBJParser.h"     /* Loading function for triangle meshes in OBJ format */
 
@@ -84,7 +92,7 @@ int oldTime = 0;
 /*----------------------------------------------------------------*/
 
 /* Define handles to vertex buffer objects */
-GLuint VBO_CUBE, VBO_PYRAMID, VBO_TEAPOT;
+GLuint VBO_CUBE, VBO_PYRAMID, VBO_TEAPOT, VBO_FLOOR;
 
 /* Define handles to color buffer objects */
 GLuint CBO_CUBE, CBO_PYRAMID, CBO_PYRAMID2, CBO_PYRAMID3, CBO_PYRAMID4, CBO_PYRAMID5, CBO_PYRAMID6;
@@ -93,7 +101,7 @@ GLuint CBO_CUBE, CBO_PYRAMID, CBO_PYRAMID2, CBO_PYRAMID3, CBO_PYRAMID4, CBO_PYRA
 GLuint NBO_CUBE, NBO_PYRAMID, NBO_TEAPOT;
 
 /* Define handles to index buffer objects */
-GLuint IBO_CUBE, IBO_PYRAMID, IBO_TEAPOT;
+GLuint IBO_CUBE, IBO_PYRAMID, IBO_TEAPOT, IBO_FLOOR;
 
 /* Arrays for holding vertex data of the two models */
 GLfloat *vba_teapot;
@@ -104,9 +112,14 @@ GLushort *iba_teapot;
 //objects
 obj_scene_data data;
 
+/* Variables for texture handling */
+GLuint TextureID;
+GLuint TextureUniform;
+TextureDataPtr Texture;
+
 /* Indices to vertex attributes; in this case positon and color */
 enum DataID {
-	vPosition = 0, vColor = 1, vNormal = 2,
+	vPosition = 0, vColor = 1, vNormal = 2, vUV = 3,
 };
 
 /* Strings for loading and storing shader code */
@@ -314,12 +327,36 @@ GLfloat cba_floor[] = { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
 GLfloat cba_pyramid_back[] = { /* RGB color values for vertices */
 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, };
 
-
-
 //normal buffers:
 GLfloat *nba_cube;
 GLfloat *nba_pyramid;
 GLfloat *nba_teapot;
+
+
+/* Structure containing XYZ position and RGB color data */
+typedef struct
+{
+    GLfloat Position[3];
+    GLfloat UV[2];
+} VertexData;
+
+/* Define vertex positions and UV coordinates */
+VertexData Floor[] =
+{
+		{{-40.0, 0.0,  40.0},{0,1}},    // 2 4
+		{{-40.0, 0.0, -40.0},{0,0}},    // 3 5
+		{{ 40.0, 0.0, -40.0},{1,0}},    // 6 6
+		{{ 40.0, 0.0,  40.0},{1,1}},    // 7 7
+
+};
+
+
+//Index buffer array - floor
+GLushort iba_floor[] = {
+		0,3,1,
+		1,3,2,
+};
+
 
 /*----------------------------------------------------------------*/
 
@@ -443,6 +480,17 @@ void setColor(GLfloat* val) {
 	glUniform4f(ColorLoc, val[0], val[1], val[2], val[3]);
 }
 
+void enableTexture(){
+
+	GLint useTextureLoc = glGetUniformLocation(ShaderProgram, "UseTexture");
+	glUniform1i(useTextureLoc, 1);
+}
+
+void disableTexture(){
+
+	GLint useTextureLoc = glGetUniformLocation(ShaderProgram, "UseTexture");
+	glUniform1i(useTextureLoc, 0);
+}
 
 void setEyeDirection(GLfloat x, GLfloat y, GLfloat z) {
 
@@ -607,7 +655,7 @@ void Display() {
 	MultiplyMatrix(ModelMatrixPyramid3, transform, ModelMatrix);
 	MultiplyMatrix(Rotation, ModelMatrix, ModelMatrix);
 	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
-	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);	
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
 
 	//switch color buffer
 	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID4);
@@ -627,48 +675,16 @@ void Display() {
 	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	SetScaling(3.0, 3.0, 3.0, scaling);
-	SetTranslation(10.0, 5.0, -10.0, transform);
+	SetTranslation(10.0, 5.4, -10.0, transform);
 	MultiplyMatrix(transform, scaling, ModelMatrixPyramid5);
 	MultiplyMatrix(transform, ModelMatrixPyramid5, transform);
 	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixPyramid5);
 	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
 
-	//switch buffers
-
-	//vertex buffer
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_CUBE);
-	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, NBO_CUBE);
-	glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	//index buffer
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_CUBE);
-	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-
-	//color buffer
-	glBindBuffer(GL_ARRAY_BUFFER, NBO_PYRAMID);
-	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	setColor(cba_floors);
-
-	//color buffer
-	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID5);
-	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	setColor(cba_floors);
-
-	//floor
-	SetScaling(50.0, 1.0, 50.0, scaling);
-	SetTranslation(0.0, -1.0, 0.0, transform);
-	MultiplyMatrix(transform, scaling, ModelMatrixFloor);
-	MultiplyMatrix(transform, ModelMatrixFloor, transform);
-	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixFloor);
-	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
-
-	//end floor
 
 	//begin teapot
 
-	//switch to pyramid buffers
+	//switch to teapot buffers
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_TEAPOT);
 	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
@@ -679,7 +695,6 @@ void Display() {
 	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
 
 	//switch color buffer
-	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID4);
 	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	setColor(cba_purple);
 
@@ -689,13 +704,58 @@ void Display() {
 	MultiplyMatrix(transform, ModelMatrixPyramidTeapot, transform);
 	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixPyramidTeapot);
 	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
-
 	//end teapot
 
+	
+	//begin textures
+
+    /* Activate first (and only) texture unit */
+    glActiveTexture(GL_TEXTURE0);
+
+    /* Bind current texture  */
+    glBindTexture(GL_TEXTURE_2D, TextureID);
+
+    /* Get texture uniform handle from fragment shader */
+    TextureUniform  = glGetUniformLocation(ShaderProgram, "myTextureSampler");
+
+    /* Set location of uniform sampler variable */
+    glUniform1i(TextureUniform, 0);
+
+    /* Enable position and UV attribute */
+    glEnableVertexAttribArray(vPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_FLOOR);
+	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_CUBE);
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+
+    /* For each vertex attribue specify location of data */
+	glEnableVertexAttribArray(vUV);
+    glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), 0);
+    glVertexAttribPointer(vUV, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData),
+			  (const GLvoid*) sizeof(Floor[0].Position));
+
+    //enable texture in fragment shader
+    enableTexture();
+
+    //floor texture
+	SetScaling(1.0, 1.0, 1.0, scaling);
+	SetTranslation(0.0, -0.73, 0.0, transform);
+	MultiplyMatrix(transform, scaling, ModelMatrixFloor);
+	MultiplyMatrix(transform, ModelMatrixFloor, transform);
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixFloor);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+	//disable texture in fragment shader
+	disableTexture();
+
+	//end textures
+	
 	/* Disable attributes */
 	glDisableVertexAttribArray(vPosition);
 	glDisableVertexAttribArray(vColor);
 	glDisableVertexAttribArray(vNormal);
+	glDisableVertexAttribArray(vUV);
 
 	/* Swap between front and back buffer */
 	glutSwapBuffers();
@@ -759,10 +819,6 @@ void OnIdle() {
 	int newTime = glutGet(GLUT_ELAPSED_TIME);
 	int delta = newTime - oldTime;
 	oldTime = newTime;
-
-//BEGIN TO BE DELETED
-	//delta = 0.0f;
-//END TO BE DELETED
 
 	//manual animation
 	if (anim) {
@@ -925,6 +981,18 @@ void SetupDataBuffers() {
 	glBufferData(GL_ARRAY_BUFFER, data.vertex_count * 3 * sizeof(GLfloat),
 			nba_teapot, GL_STATIC_DRAW);
 
+
+	//floor
+	glGenBuffers(1, &VBO_FLOOR);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_FLOOR);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Floor), Floor, GL_STATIC_DRAW);
+
+	//index buffer for floor
+	glGenBuffers(1, &IBO_FLOOR);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_FLOOR);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(iba_floor), iba_floor,
+			GL_STATIC_DRAW);
+
 }
 
 /******************************************************************
@@ -1043,6 +1111,60 @@ void setupLighting() {
 }
 
 /******************************************************************
+*
+* SetupTexture
+*
+* This function is called to load the texture and initialize
+* texturing parameters
+*
+*******************************************************************/
+
+void SetupTexture(void)
+{
+    /* Allocate texture container */
+    Texture = malloc(sizeof(TextureDataPtr));
+
+    int success = LoadTexture("data/chess.bmp", Texture);
+    if (!success)
+    {
+        printf("Error loading texture. Exiting.\n");
+	exit(-1);
+    }
+
+    /* Create texture name and store in handle */
+    glGenTextures(1, &TextureID);
+
+    /* Bind texture */
+    glBindTexture(GL_TEXTURE_2D, TextureID);
+
+    /* Load texture image into memory */
+    glTexImage2D(GL_TEXTURE_2D,     /* Target texture */
+		 0,                 /* Base level */
+		 GL_RGB,            /* Each element is RGB triple */
+		 Texture->width,    /* Texture dimensions */
+         Texture->height,
+		 0,                 /* Border should be zero */
+		 GL_BGR,            /* Data storage format for BMP file */
+		 GL_UNSIGNED_BYTE,  /* Type of pixel data, one byte per channel */
+		 Texture->data);    /* Pointer to image data  */
+
+    /* Next set up texturing parameters */
+
+    /* Repeat texture on edges when tiling */
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    /* Linear interpolation for magnification */
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    /* Trilinear MIP mapping for minification */
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    /* Note: MIP mapping not visible due to fixed, i.e. static camera */
+}
+
+/******************************************************************
  *
  * Initialize
  *
@@ -1050,9 +1172,6 @@ void setupLighting() {
  * vertex buffer objects, and to setup the vertex and fragment s0ader
  *
  *******************************************************************/
-
-
-
 
 void Initialize(void) {
 
@@ -1124,6 +1243,9 @@ void Initialize(void) {
 
 	/* Setup shaders and shader program */
 	CreateShaderProgram();
+
+	/* Setup texture */
+	SetupTexture();
 
 	/* Initialize matrices */
 	SetIdentityMatrix(ProjectionMatrix);
@@ -1323,7 +1445,7 @@ int main(int argc, char** argv) {
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 	glutInitWindowSize(600, 600);
 	glutInitWindowPosition(10, 10);
-	glutCreateWindow("Assignment 3 - MerryGoRound");
+	glutCreateWindow("Assignment 4 - MerryGoRound");
 
 	/* Initialize GL extension wrangler */
 	GLenum res = glewInit();
