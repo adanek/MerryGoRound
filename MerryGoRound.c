@@ -92,7 +92,7 @@ int oldTime = 0;
 /*----------------------------------------------------------------*/
 
 /* Define handles to vertex buffer objects */
-GLuint VBO_CUBE, VBO_PYRAMID, VBO_TEAPOT, VBO_FLOOR;
+GLuint VBO_CUBE, VBO_PYRAMID, VBO_TEAPOT, VBO_FLOOR, VBO_PYRAMID_T;
 
 /* Define handles to color buffer objects */
 GLuint CBO_CUBE, CBO_PYRAMID, CBO_PYRAMID2, CBO_PYRAMID3, CBO_PYRAMID4, CBO_PYRAMID5, CBO_PYRAMID6;
@@ -113,9 +113,11 @@ GLushort *iba_teapot;
 obj_scene_data data;
 
 /* Variables for texture handling */
-GLuint TextureID;
+GLuint TextureIDChess;
+GLuint TextureIDPyramid;
 GLuint TextureUniform;
 TextureDataPtr Texture;
+TextureDataPtr TexturePyramid;
 
 /* Indices to vertex attributes; in this case positon and color */
 enum DataID {
@@ -262,7 +264,7 @@ GLfloat cba_floors[] = { 0.5, 0.5, 0.0, 1.0 };
 /*----------------------------------------------------------------*/
 //Buffers for pyramids:
 //Vertex buffer
-GLfloat vba_pyramid[] = { 
+GLfloat vba_pyramid[] = {
 	-1.0, -2.0, -1.0,
 	 1.0, -2.0, -1.0,
 	 1.0, -2.0,  1.0,
@@ -270,7 +272,7 @@ GLfloat vba_pyramid[] = {
 
 	 1.0, -2.0, -1.0,
 	-1.0, -2.0, -1.0,
-	 0.0,  0.0,  0.0, 
+	 0.0,  0.0,  0.0,
 
 	 1.0, -2.0, 1.0,
 	 0.0, 0.0, 0.0,
@@ -356,6 +358,42 @@ GLushort iba_floor[] = {
 		0,3,1,
 		1,3,2,
 };
+
+
+
+
+//Vertex buffer
+VertexData vba_pyramid_texture[] = {
+
+	//bottom
+	{{-1.0, -2.0, -1.0},{0,0}},
+	{{ 1.0, -2.0, -1.0},{0,0}},
+	{{ 1.0, -2.0,  1.0},{0,0}},
+	{{-1.0, -2.0,  1.0},{0,0}},
+
+	//back
+	{{ 1.0, -2.0, -1.0},{1,0}},
+	{{-1.0, -2.0, -1.0},{0,0}},
+	{{ 0.0,  0.0,  0.0},{0.5,0.5}},
+
+	//front
+	{{ 1.0, -2.0, 1.0},{1,1}},
+	{{ 0.0, 0.0, 0.0},{0.5,0.5}},
+	{{-1.0, -2.0, 1.0},{0,1}},
+
+	//left
+	{{-1.0, -2.0, -1.0},{0,0}},
+	{{-1.0, -2.0, 1.0},{0,1}},
+	{{ 0.0, 0.0, 0.0},{0.5,0.5}},
+
+	//right
+	{{ 0.0, 0.0, 0.0},{0.5,0.5}},
+	{{ 1.0, -2.0, 1.0},{1,1}},
+	{{ 1.0, -2.0, -1.0},{1,0}}
+};
+
+
+
 
 
 /*----------------------------------------------------------------*/
@@ -671,15 +709,15 @@ void Display() {
 	//pyramid 5 - static
 
 	//color buffer
-	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID6);
-	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	SetScaling(3.0, 3.0, 3.0, scaling);
-	SetTranslation(10.0, 5.4, -10.0, transform);
-	MultiplyMatrix(transform, scaling, ModelMatrixPyramid5);
-	MultiplyMatrix(transform, ModelMatrixPyramid5, transform);
-	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixPyramid5);
-	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+//	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID6);
+//	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
+//
+//	SetScaling(3.0, 3.0, 3.0, scaling);
+//	SetTranslation(10.0, 5.4, -10.0, transform);
+//	MultiplyMatrix(transform, scaling, ModelMatrixPyramid5);
+//	MultiplyMatrix(transform, ModelMatrixPyramid5, transform);
+//	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixPyramid5);
+//	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
 
 
 	//begin teapot
@@ -713,7 +751,7 @@ void Display() {
     glActiveTexture(GL_TEXTURE0);
 
     /* Bind current texture  */
-    glBindTexture(GL_TEXTURE_2D, TextureID);
+    glBindTexture(GL_TEXTURE_2D, TextureIDChess);
 
     /* Get texture uniform handle from fragment shader */
     TextureUniform  = glGetUniformLocation(ShaderProgram, "myTextureSampler");
@@ -745,6 +783,48 @@ void Display() {
 	MultiplyMatrix(transform, ModelMatrixFloor, transform);
 	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixFloor);
 	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+
+
+	//beginstatic pyramid
+    /* Activate first (and only) texture unit */
+    glActiveTexture(GL_TEXTURE1);
+
+    /* Bind current texture  */
+    glBindTexture(GL_TEXTURE_2D, TextureIDPyramid);
+
+    /* Get texture uniform handle from fragment shader */
+    TextureUniform  = glGetUniformLocation(ShaderProgram, "myTextureSampler");
+
+    /* Set location of uniform sampler variable */
+    glUniform1i(TextureUniform, 1);
+
+
+
+    /* Enable position and UV attribute */
+    glEnableVertexAttribArray(vPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_PYRAMID_T);
+	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_PYRAMID);
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+
+    /* For each vertex attribue specify location of data */
+	glEnableVertexAttribArray(vUV);
+    glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), 0);
+    glVertexAttribPointer(vUV, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData),
+			  (const GLvoid*) sizeof(vba_pyramid_texture[0].Position));
+
+	SetScaling(3.0, 3.0, 3.0, scaling);
+	SetTranslation(10.0, 5.4, -10.0, transform);
+	MultiplyMatrix(transform, scaling, ModelMatrixPyramid5);
+	MultiplyMatrix(transform, ModelMatrixPyramid5, transform);
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixPyramid5);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+	//end static pyramid
+
+
+
 
 	//disable texture in fragment shader
 	disableTexture();
@@ -914,6 +994,12 @@ void SetupDataBuffers() {
 	glGenBuffers(1, &VBO_PYRAMID);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_PYRAMID);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vba_pyramid), vba_pyramid,
+			GL_STATIC_DRAW);
+
+	//vertex buffer (pyramid with texture coordinates)
+	glGenBuffers(1, &VBO_PYRAMID_T);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_PYRAMID_T);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vba_pyramid_texture), vba_pyramid_texture,
 			GL_STATIC_DRAW);
 
 	//index buffer
@@ -1119,8 +1205,8 @@ void setupLighting() {
 *
 *******************************************************************/
 
-void SetupTexture(void)
-{
+void SetupTextureFloor(void){
+
     /* Allocate texture container */
     Texture = malloc(sizeof(TextureDataPtr));
 
@@ -1132,10 +1218,10 @@ void SetupTexture(void)
     }
 
     /* Create texture name and store in handle */
-    glGenTextures(1, &TextureID);
+    glGenTextures(1, &TextureIDChess);
 
     /* Bind texture */
-    glBindTexture(GL_TEXTURE_2D, TextureID);
+    glBindTexture(GL_TEXTURE_2D, TextureIDChess);
 
     /* Load texture image into memory */
     glTexImage2D(GL_TEXTURE_2D,     /* Target texture */
@@ -1162,6 +1248,63 @@ void SetupTexture(void)
     glGenerateMipmap(GL_TEXTURE_2D);
 
     /* Note: MIP mapping not visible due to fixed, i.e. static camera */
+
+
+}
+
+void SetupTexturePyramid(void){
+
+    /* Allocate texture container */
+    TexturePyramid = malloc(sizeof(TextureDataPtr));
+
+    int success = LoadTexture("data/floor.bmp", TexturePyramid);
+    if (!success)
+    {
+        printf("Error loading texture. Exiting.\n");
+	exit(-1);
+    }
+
+    /* Create texture name and store in handle */
+    glGenTextures(1, &TextureIDPyramid);
+
+    /* Bind texture */
+    glBindTexture(GL_TEXTURE_2D, TextureIDPyramid);
+
+    /* Load texture image into memory */
+    glTexImage2D(GL_TEXTURE_2D,     /* Target texture */
+		 0,                 /* Base level */
+		 GL_RGB,            /* Each element is RGB triple */
+		 TexturePyramid->width,    /* Texture dimensions */
+         TexturePyramid->height,
+		 0,                 /* Border should be zero */
+		 GL_BGR,            /* Data storage format for BMP file */
+		 GL_UNSIGNED_BYTE,  /* Type of pixel data, one byte per channel */
+		 TexturePyramid->data);    /* Pointer to image data  */
+
+    /* Next set up texturing parameters */
+
+    /* Repeat texture on edges when tiling */
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    /* Linear interpolation for magnification */
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    /* Trilinear MIP mapping for minification */
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    /* Note: MIP mapping not visible due to fixed, i.e. static camera */
+
+}
+
+void SetupTexture(void)
+{
+
+	SetupTextureFloor();
+	SetupTexturePyramid();
+
+
 }
 
 /******************************************************************
