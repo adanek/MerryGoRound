@@ -41,9 +41,11 @@
  * a directly lit face was not complete bright (because of the interpolated normals)
  * thats why we used vertex doubling do receive a constand normal for each face.
  *
- * Changes in Assignmet 4:
+ * Changes in Assignment 4:
  * Texturing:
- *
+ * floor texture added
+ * background pyramid texture added
+ * top texture added
  *
  *******************************************************************/
 
@@ -633,11 +635,6 @@ void Display() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_PYRAMID);
 	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
 
-//top pyramid
-//	SetScaling(4.0, 1.0, 4.0, scaling);
-//	MultiplyMatrix(ModelMatrixPyramidTop, scaling, ModelMatrix);
-//	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
-//	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
 
 //switch color buffer
 	glBindBuffer(GL_ARRAY_BUFFER, CBO_PYRAMID);
@@ -694,31 +691,39 @@ void Display() {
 //begin background objects
 
 
-//begin teapot
-
-//switch to teapot buffers
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_TEAPOT);
-	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, NBO_TEAPOT);
-	glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_TEAPOT);
-	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-
-//switch color buffer
-	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	setColor(cba_purple);
-
-	SetScaling(1.0, 1.0, 1.0, scaling);
-	SetTranslation(10.0, 5.0, -10.0, transform);
-	MultiplyMatrix(transform, scaling, ModelMatrixPyramidTeapot);
-	MultiplyMatrix(transform, ModelMatrixPyramidTeapot, transform);
-	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixPyramidTeapot);
-	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
-//end teapot
-
 //begin textures
+
+	//begin teapot
+
+	//switch to teapot buffers
+		glBindBuffer(GL_ARRAY_BUFFER, VBO_TEAPOT);
+		glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, NBO_TEAPOT);
+		glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_TEAPOT);
+		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+
+
+		//activate texture unit for teapot
+		activateTexture(0, TextureIDChess);
+
+	//	/* For each vertex attribue specify location of data */
+		glEnableVertexAttribArray(vUV);
+		glVertexAttribPointer(vUV, 2, GL_FLOAT, GL_FALSE, sizeof(data.vertex_count),
+				(const GLvoid*) (2 * sizeof(obj_vector)));
+
+	//enable texture in fragment shader
+		enableTexture();
+
+		SetScaling(0.4, 0.4, 0.4, scaling);
+		SetTranslation(10.0, 4.0, -10.0, transform);
+		MultiplyMatrix(transform, scaling, ModelMatrixPyramidTeapot);
+		MultiplyMatrix(transform, ModelMatrixPyramidTeapot, transform);
+		glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrixPyramidTeapot);
+		glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+	//end teapot
 
 	//activate texture unit for floor
 	activateTexture(0, TextureIDChess);
@@ -1325,7 +1330,7 @@ void Initialize(void) {
 	int success;
 
 	/* Load first OBJ model */
-	char* filename = "models/teapot.obj";
+	char* filename = "models/teapot3.obj";
 	success = parse_obj_scene(&data, filename);
 
 	if (!success)
