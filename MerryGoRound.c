@@ -1,6 +1,6 @@
 /******************************************************************
  *
- * MerryGoRound.c
+ * Merrygoround.c
  *
  * Computer Graphics Proseminar SS 2015
  *
@@ -60,6 +60,8 @@
 #define _USE_MATH_DEFINES
 #endif
 
+#define UNUSED(X) (void)(X)
+
 /* Standard includes */
 #include <stdio.h>
 #include <stdlib.h>
@@ -92,16 +94,16 @@ int oldTime = 0;
 /*----------------------------------------------------------------*/
 
 /* Define handles to vertex buffer objects */
-GLuint VBO_CUBE, VBO_PYRAMID, VBO_TEAPOT, VBO_FLOOR, VBO_PYRAMID_T;
+GLuint VBO_CUBE, VBO_PYRAMID, VBO_BILLBOARD, VBO_TEAPOT, VBO_FLOOR, VBO_PYRAMID_T;
 
 /* Define handles to color buffer objects */
-GLuint CBO_CUBE, CBO_PYRAMID, CBO_PYRAMID2, CBO_PYRAMID3, CBO_PYRAMID4, CBO_PYRAMID5, CBO_PYRAMID6;
+GLuint CBO_CUBE, CBO_PYRAMID, CBO_PYRAMID2, CBO_PYRAMID3, CBO_PYRAMID4, CBO_PYRAMID5, CBO_PYRAMID6, CBO_BILLBOARD;
 
 /* Define handles to color buffer objects */
-GLuint NBO_CUBE, NBO_PYRAMID, NBO_TEAPOT;
+GLuint NBO_CUBE, NBO_PYRAMID, NBO_TEAPOT, NBO_BILLBOARD;
 
 /* Define handles to index buffer objects */
-GLuint IBO_CUBE, IBO_PYRAMID, IBO_TEAPOT, IBO_FLOOR;
+GLuint IBO_CUBE, IBO_PYRAMID, IBO_TEAPOT, IBO_FLOOR, IBO_BILLBOARD;
 
 /* Arrays for holding vertex data of the two models */
 GLfloat *vba_teapot;
@@ -159,6 +161,7 @@ float ModelMatrixPyramidTeapot[16];
 float ModelMatrixPyramidTop[16];
 float ModelMatrixTop[16];
 float ModelMatrixFloor[16];
+float ModelMatrixBillboard[16];
 
 // Enables the animation of the camera
 int animateCamera = 1;
@@ -262,6 +265,26 @@ GLfloat cba_floors[] = { 0.5, 0.5, 0.0, 1.0 };
 
 
 /*----------------------------------------------------------------*/
+//Buffers for Billboard:
+//Vertex buffer
+GLfloat vba_billboard[] = {
+  1.0,  1.0, 0.0,
+  1.0, -1.0, 0.0,
+  -1.0,-1.0, 0.0,
+  -1.0, 1.0, 0.0,
+};
+
+//Index buffer
+GLushort iba_billboard[] = { 
+  0, 1, 2,
+  2, 3, 0
+} ;
+GLfloat cba_billboard[] = { /* RGB color values for vertices */
+  0.0, 0.0, 0.0, 0.0
+};
+
+
+/*----------------------------------------------------------------*/
 //Buffers for pyramids:
 //Vertex buffer
 GLfloat vba_pyramid[] = {
@@ -333,6 +356,7 @@ GLfloat cba_pyramid_back[] = { /* RGB color values for vertices */
 GLfloat *nba_cube;
 GLfloat *nba_pyramid;
 GLfloat *nba_teapot;
+GLfloat *nba_billboard;
 
 
 /* Structure containing XYZ position and RGB color data */
@@ -604,6 +628,7 @@ void Display() {
 	//connectors
 	float transform[16];
 
+
 	//connector 1
 	SetScaling(0.05, 8.0, 0.05, scaling);
 	SetTranslation(1.7, 1.1, 1.7, transform);
@@ -636,6 +661,22 @@ void Display() {
 	MultiplyMatrix(Rotation, transform, ModelMatrix);
 	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
 	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+	//Billboard
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_BILLBOARD);
+	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, NBO_BILLBOARD);
+	glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_BILLBOARD);
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+
+	SetScaling(1.0,1.0,1.0, scaling);
+	MultiplyMatrix(ModelMatrixBillboard, scaling, ModelMatrix);
+	glUniformMatrix4fv(RotationUniform, 1, GL_TRUE, ModelMatrix);
+	glDrawElements(GL_TRIANGLES, size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
 
 	//switch to pyramid buffers
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_PYRAMID);
@@ -944,6 +985,41 @@ void OnIdle() {
 	//translation of the whole object
 	SetTranslation(0.0, -3.0, distance, ViewMatrix);
 
+
+	//billboard - down here because we need the current camera position to accurately calculate the direction the billboard is facing.
+	SetTranslation(0.0, 8.0, 0.0, temp2);
+	float cameraPosition[4];
+	float source[4] = {0.0, -3.0, distance, 1};
+	MultiplyMatrixWithPoint(rotation, source, cameraPosition);
+	for(int i = 0; i < 3; ++i)
+	  cameraPosition[i]*=-1;
+	float billboardPosition[3] = {
+	  0,
+	  8,
+	  0
+	};
+	float rotationResult[3] = {
+	  (sqrt(pow((cameraPosition[2]-billboardPosition[2]),2)+pow(cameraPosition[0]-billboardPosition[0],2)) > 0 ? M_PI : 0)+
+	  atanf((cameraPosition[1]-billboardPosition[1])/ //macht Probleme, wenn man manuell auf X- oder Z-Achse Kamera wechselt
+		sqrt(pow((cameraPosition[2]-billboardPosition[2]),2)+pow(cameraPosition[0]-billboardPosition[0],2))),
+	  ((cameraPosition[2]-billboardPosition[2])>0?M_PI:0) - 1 * atanf( //Wenn die Textur da ist, sollte man nicht jede halbe Drehung das Bild spiegeln
+		     (cameraPosition[0]-billboardPosition[0]) /
+		     (cameraPosition[2]-billboardPosition[2])),
+	  0
+	};
+	for(int i = 0; i < 3; ++i)
+	  rotationResult[i] *=180/M_PI;
+	float temp3[16];
+	printf("%2.2f, %2.2f - Distanz zur Y-Achse: %2.2f\n",cameraPosition[0], cameraPosition[2], sqrt(pow((cameraPosition[2]),2)+pow(-cameraPosition[0],2))); //??? - warum bewegen wir uns nicht mehr in einem Kreis, wenn wir mit der linken Maustaste Rotation entlang der X-Achse einschalten und dann wieder zur Y-Achse wechseln?
+	SetRotationY(rotationResult[1], temp3);
+	MultiplyMatrix(temp2, temp3, temp2);
+	SetRotationZ(rotationResult[2], temp3);
+	MultiplyMatrix(temp2, temp3, temp2);
+	SetRotationX(rotationResult[0], temp3);
+	MultiplyMatrix(temp2, temp3, ModelMatrixBillboard);	
+
+	//MultiplyMatrix(temp2, rotation, ModelMatrixBillboard);
+
 	if (animateCamera){
 		MultiplyMatrix(ViewMatrix, rotation, ViewMatrix);
 	}
@@ -988,7 +1064,31 @@ void SetupDataBuffers() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vba_cube), nba_cube,
 	GL_STATIC_DRAW);
 
-	//Buffers for innter elements:
+	//Buffers for Billboard:
+
+	//vertex buffer
+	glGenBuffers(1, &VBO_BILLBOARD);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_BILLBOARD);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vba_billboard), vba_billboard, GL_STATIC_DRAW);
+
+	//index buffer
+	glGenBuffers(1, &IBO_BILLBOARD);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO_BILLBOARD);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(iba_billboard), iba_billboard, GL_STATIC_DRAW);
+
+	//color buffer
+	glGenBuffers(1, &CBO_BILLBOARD);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO_BILLBOARD);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cba_billboard), cba_billboard,
+	GL_STATIC_DRAW);
+
+	//normal buffer
+	glGenBuffers(1, &NBO_BILLBOARD);
+	glBindBuffer(GL_ARRAY_BUFFER, NBO_BILLBOARD);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vba_billboard), nba_billboard,
+	GL_STATIC_DRAW);
+
+	//Buffers for inner elements:
 
 	//vertex buffer (pyramid)
 	glGenBuffers(1, &VBO_PYRAMID);
@@ -1363,6 +1463,11 @@ void Initialize(void) {
 	nba_teapot = (GLfloat*) malloc(data.vertex_count * 3 * sizeof(GLfloat));
 	memset(nba_teapot, 0.0, data.vertex_count * 3 * sizeof(GLfloat));
 
+
+	//normals for billboard
+	nba_billboard = (GLfloat*) malloc(sizeof(vba_billboard));
+	memset(nba_billboard, 0.0f, sizeof(vba_billboard));
+
 	//calculate normals
 	calculateNormals(iba_cube, vba_cube, nba_cube,
 			sizeof(iba_cube) / sizeof(GLushort),
@@ -1371,6 +1476,10 @@ void Initialize(void) {
 	calculateNormals(iba_pyramid, vba_pyramid, nba_pyramid,
 			sizeof(iba_pyramid) / sizeof(GLushort),
 			sizeof(vba_pyramid) / sizeof(GLfloat));
+
+	calculateNormals(iba_pyramid, vba_billboard, nba_billboard,
+			sizeof(iba_billboard) / sizeof(GLushort),
+			sizeof(vba_billboard) / sizeof(GLfloat));
 
 	calculateNormals(iba_teapot, vba_teapot, nba_teapot, indx * 3, vert * 3);
 
@@ -1422,6 +1531,9 @@ void Initialize(void) {
  *******************************************************************/
 
 void Keyboard(unsigned char key, int x, int y) {
+
+  UNUSED(x);
+  UNUSED(y);
 
 	GLfloat ambient = 0.0;
 	GLint show_ambient = 0;
@@ -1551,6 +1663,9 @@ void Keyboard(unsigned char key, int x, int y) {
  *******************************************************************/
 
 void Mouse(int button, int state, int x, int y) {
+
+  UNUSED(x);
+  UNUSED(y);
 
 	if (state == GLUT_DOWN) {
 		/* Depending on button pressed, set rotation axis,

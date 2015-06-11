@@ -219,4 +219,11 @@ void SetPerspectiveMatrix(float fov, float aspect, float nearPlane,
     memcpy(result, temp, 16*sizeof(float));
 }
 
+void MultiplyMatrixWithPoint(float *matrix, float *point, float *result) {
+  for(int i = 0; i < 4; ++i) {
+    result[i] = 0;
+    for(int j = 0; j < 4; ++j)
+      result[i] += matrix[4*i+j]*point[j];
+  }
+}
 

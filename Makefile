@@ -1,5 +1,5 @@
 CC = gcc
-OBJ = vector.o MerryGoRound.o LoadShader.o Matrix.o OBJParser.o List.o StringExtra.o
+OBJ = vector.o MerryGoRound.o LoadShader.o LoadTexture.o Matrix.o OBJParser.o List.o StringExtra.o
 CFLAGS = -g -Wall -Wextra -std=gnu99
 
 LDLIBS=-lm -lglut -lGLEW -lGL
