@@ -119,10 +119,12 @@ obj_scene_data data;
 GLuint TextureIDChess;
 GLuint TextureIDPyramid;
 GLuint TextureIDTop;
+GLuint TextureIDTeapot;
 GLuint TextureUniform;
 TextureDataPtr Texture;
 TextureDataPtr TexturePyramid;
 TextureDataPtr TextureTop;
+TextureDataPtr TextureTeapot;
 
 /* Indices to vertex attributes; in this case positon and color */
 enum DataID {
@@ -510,6 +512,9 @@ void activateTexture(GLuint handle, GLuint id) {
 	case 2:
 		glActiveTexture(GL_TEXTURE2);
 		break;
+	case 3:
+		glActiveTexture(GL_TEXTURE3);
+		break;
 	}
 
 	/* Bind current texture  */
@@ -707,7 +712,7 @@ void Display() {
 
 
 		//activate texture unit for teapot
-		activateTexture(0, TextureIDChess);
+		activateTexture(3, TextureIDTeapot);
 
 	//	/* For each vertex attribue specify location of data */
 		glEnableVertexAttribArray(vUV);
@@ -1216,6 +1221,51 @@ void SetupTextureFloor(void) {
 
 }
 
+void SetupTextureTeapot(void) {
+
+	/* Allocate texture container */
+	TextureTeapot = malloc(sizeof(TextureDataPtr));
+
+	int success = LoadTexture("data/lego.bmp", TextureTeapot);
+	if (!success) {
+		printf("Error loading texture. Exiting.\n");
+		exit(-1);
+	}
+
+	/* Create texture name and store in handle */
+	glGenTextures(1, &TextureIDTeapot);
+
+	/* Bind texture */
+	glBindTexture(GL_TEXTURE_2D, TextureIDTeapot);
+
+	/* Load texture image into memory */
+	glTexImage2D(GL_TEXTURE_2D, /* Target texture */
+	0, /* Base level */
+	GL_RGB, /* Each element is RGB triple */
+	TextureTeapot->width, /* Texture dimensions */
+	TextureTeapot->height, 0, /* Border should be zero */
+	GL_BGR, /* Data storage format for BMP file */
+	GL_UNSIGNED_BYTE, /* Type of pixel data, one byte per channel */
+	TextureTeapot->data); /* Pointer to image data  */
+
+	/* Next set up texturing parameters */
+
+	/* Repeat texture on edges when tiling */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	/* Linear interpolation for magnification */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	/* Trilinear MIP mapping for minification */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+			GL_LINEAR_MIPMAP_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	/* Note: MIP mapping not visible due to fixed, i.e. static camera */
+
+}
+
 void SetupTexturePyramid(void) {
 
 	/* Allocate texture container */
@@ -1312,6 +1362,7 @@ void SetupTexture(void) {
 	SetupTextureFloor();
 	SetupTexturePyramid();
 	SetupTextureTop();
+	SetupTextureTeapot();
 
 }
 
