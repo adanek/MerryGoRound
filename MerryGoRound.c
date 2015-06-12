@@ -1181,7 +1181,7 @@ void SetupTextureFloor(void) {
 	/* Allocate texture container */
 	Texture = malloc(sizeof(TextureDataPtr));
 
-	int success = LoadTexture("data/chess.bmp", Texture);
+	int success = LoadTexture("./data/chess.bmp", Texture);
 	if (!success) {
 		printf("Error loading texture. Exiting.\n");
 		exit(-1);
@@ -1226,7 +1226,7 @@ void SetupTextureTeapot(void) {
 	/* Allocate texture container */
 	TextureTeapot = malloc(sizeof(TextureDataPtr));
 
-	int success = LoadTexture("data/lego.bmp", TextureTeapot);
+	int success = LoadTexture("./data/lego.bmp", TextureTeapot);
 	if (!success) {
 		printf("Error loading texture. Exiting.\n");
 		exit(-1);
@@ -1271,7 +1271,7 @@ void SetupTexturePyramid(void) {
 	/* Allocate texture container */
 	TexturePyramid = malloc(sizeof(TextureDataPtr));
 
-	int success = LoadTexture("data/floor.bmp", TexturePyramid);
+	int success = LoadTexture("./data/floor.bmp", TexturePyramid);
 	if (!success) {
 		printf("Error loading texture. Exiting.\n");
 		exit(-1);
@@ -1316,7 +1316,7 @@ void SetupTextureTop(void) {
 	/* Allocate texture container */
 	TextureTop = malloc(sizeof(TextureDataPtr));
 
-	int success = LoadTexture("data/dach.bmp", TextureTop);
+	int success = LoadTexture("./data/dach.bmp", TextureTop);
 	if (!success) {
 		printf("Error loading texture. Exiting.\n");
 		exit(-1);
