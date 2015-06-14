@@ -232,20 +232,6 @@ GLushort iba_cube[] = {
 
 		// Right
 		20, 21, 22, 20, 22, 23
-
-/*
- 0, 1, 2,
- 2, 3, 0,
- 1, 4, 7,
- 7, 2, 1,
- 6, 7, 5,
- 4, 5, 7,
- 4, 0, 5,
- 0, 4, 1,
- 2, 7, 6,
- 6, 3, 2,
- 6, 0, 3,
- 0, 6, 5 */
 };
 
 //Color buffer array
@@ -339,25 +325,30 @@ GLushort iba_floor[] = { 0, 3, 1, 1, 3, 2, };
 VertexData vba_pyramid_texture[] = {
 
 		//bottom
-		{ { -1.0, -2.0, -1.0 }, { 0, 0 } }, { { 1.0, -2.0, -1.0 }, { 0, 0 } }, {
-				{ 1.0, -2.0, 1.0 }, { 0, 0 } },
-		{ { -1.0, -2.0, 1.0 }, { 0, 0 } },
+		{{ -1.0, -2.0, -1.0 }, { 0, 0 } },
+		{{  1.0, -2.0, -1.0 }, { 0, 0 } },
+		{{  1.0, -2.0,  1.0 }, { 0, 0 } },
+		{{ -1.0, -2.0,  1.0 }, { 0, 0 } },
 
 		//back
-		{ { 1.0, -2.0, -1.0 }, { 1, 0 } }, { { -1.0, -2.0, -1.0 }, { 0, 0 } }, {
-				{ 0.0, 0.0, 0.0 }, { 0.5, 0.5 } },
+		{ {  1.0, -2.0, -1.0 }, { 1.0, 0.0 } },
+		{ { -1.0, -2.0, -1.0 }, { 0.0, 0.0 } },
+		{ {  0.0,  0.0,  0.0 }, { 0.5, 1.0 } },
 
 		//front
-		{ { 1.0, -2.0, 1.0 }, { 1, 1 } }, { { 0.0, 0.0, 0.0 }, { 0.5, 0.5 } }, {
-				{ -1.0, -2.0, 1.0 }, { 0, 1 } },
+		{ {  1.0, -2.0, 1.0 }, { 1.0, 0.0 } }, 
+		{ {  0.0,  0.0, 0.0 }, { 0.5, 1.0 } }, 
+		{ { -1.0, -2.0, 1.0 }, { 0.0, 0.0 } },
 
 		//left
-		{ { -1.0, -2.0, -1.0 }, { 0, 0 } }, { { -1.0, -2.0, 1.0 }, { 0, 1 } }, {
-				{ 0.0, 0.0, 0.0 }, { 0.5, 0.5 } },
+		{ { -1.0, -2.0, -1.0 }, { 0.0, 0.0 } },
+		{ { -1.0, -2.0,  1.0 }, { 1.0, 0.0 } },
+		{ {  0.0,  0.0,  0.0 }, { 0.5, 1.0 } },
 
 		//right
-		{ { 0.0, 0.0, 0.0 }, { 0.5, 0.5 } }, { { 1.0, -2.0, 1.0 }, { 1, 1 } }, {
-				{ 1.0, -2.0, -1.0 }, { 1, 0 } } };
+		{ { 0.0,  0.0,  0.0 }, { 0.5, 1.0 } },
+		{ { 1.0, -2.0,  1.0 }, { 0.0, 0.0 } },
+		{ { 1.0, -2.0, -1.0 }, { 1.0, 0.0 } } };
 
 /*----------------------------------------------------------------*/
 
@@ -1226,7 +1217,7 @@ void SetupTextureTeapot(void) {
 	/* Allocate texture container */
 	TextureTeapot = malloc(sizeof(TextureDataPtr));
 
-	int success = LoadTexture("./data/lego.bmp", TextureTeapot);
+	int success = LoadTexture("./data/teapod.bmp", TextureTeapot);
 	if (!success) {
 		printf("Error loading texture. Exiting.\n");
 		exit(-1);
@@ -1316,7 +1307,7 @@ void SetupTextureTop(void) {
 	/* Allocate texture container */
 	TextureTop = malloc(sizeof(TextureDataPtr));
 
-	int success = LoadTexture("./data/dach.bmp", TextureTop);
+	int success = LoadTexture("./data/roof.bmp", TextureTop);
 	if (!success) {
 		printf("Error loading texture. Exiting.\n");
 		exit(-1);
@@ -1521,7 +1512,7 @@ void Keyboard(unsigned char key, int x, int y) {
 		angleY = 0.0;
 		angleZ = 0.0;
 
-		distance = -20.0;
+		distance = -30.0;
 		break;
 
 	case 'q':
@@ -1594,6 +1585,12 @@ void Keyboard(unsigned char key, int x, int y) {
 		//set variable in shader
 		setShowSpecular(show_specular);
 		break;
+	case '+':
+		distance--;
+		break;
+	case '-':
+		distance++;
+
 	}
 
 	glutPostRedisplay();

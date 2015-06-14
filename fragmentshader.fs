@@ -49,7 +49,7 @@ void main()
     vec3 n  =normalize(vNormal);
     
     // Lightsource 1
-    vec3 lpos = L1_Position;
+    vec3 lpos = vec3(transpose(ViewMatrix) * vec4(L1_Position,1));
     vec3 lcol = L1_Color;
 
     vec3 lightDirection = lpos - vec3(vPosition);
